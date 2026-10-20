@@ -4,9 +4,6 @@ import React, { useState } from "react";
 import { Leaf, ShieldHalf, User, Lock, ArrowLeft } from "lucide-react";
 import { User as UserType } from "@/types";
 
-const PLANTATION_BG =
-  "https://images.pexels.com/photos/34604766/pexels-photo-34604766.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1600&w=1200";
-
 export const KDU_LOGO_URL =
   "https://res.cloudinary.com/dhd06wdov/image/upload/v1781669562/logokdu_xo5m6f.png";
 
@@ -43,25 +40,24 @@ const FloatingLeaves: React.FC = () => (
  * Replaces the static plantation photo with an autoplaying loop.
  * Overlay keeps text readable on top.
  */
+/**
+ * Video-only animated backdrop for all login screens.
+ * No poster image, no fallback photo — while the MP4 buffers, an on-brand
+ * dark emerald gradient shows instead so the screen never flashes a still.
+ */
 const VideoBackdrop: React.FC<{ overlay?: string }> = ({ overlay }) => (
-  <div className="absolute inset-0 -z-10 overflow-hidden">
-    {/* Video layer */}
+  <div className="absolute inset-0 -z-10 overflow-hidden bg-gradient-to-b from-emerald-950 via-[#06301f] to-slate-950">
+    {/* Animated tea-leaf video layer */}
     <video
       autoPlay
       muted
       loop
       playsInline
+      preload="auto"
       className="absolute inset-0 w-full h-full object-cover scale-105"
-      poster={PLANTATION_BG}
     >
       <source src={KDU_VIDEO_URL} type="video/mp4" />
     </video>
-
-    {/* Fallback image while video buffers */}
-    <div
-      className="absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-700"
-      style={{ backgroundImage: `url('${PLANTATION_BG}')` }}
-    />
 
     {/* Dark overlay for text contrast */}
     <div
