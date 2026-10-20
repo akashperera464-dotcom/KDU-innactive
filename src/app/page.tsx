@@ -164,7 +164,20 @@ export default function Home() {
     }
     applyTheme(getStoredTheme() || "light");
     setOfflineQueue(getOfflineQueue());
-    loadAppData();
+
+    // Load once; if the first attempt fails (slow DB cold-start), silently
+    // retry once after 2.5s so users never need a manual retry button.
+    let cancelled = false;
+    loadAppData().then((ok) => {
+      if (!ok && !cancelled) {
+        window.setTimeout(() => {
+          if (!cancelled) loadAppData();
+        }, 2500);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [loadAppData]);
 
   /* ---------- Auth handlers ---------- */
@@ -472,20 +485,11 @@ export default function Home() {
         </h1>
         <div className="mt-3 h-[3px] w-24 rounded-full bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
 
-        {/* Elegant loader dots + retry button */}
-        <div className="mt-7 flex flex-col items-center gap-4" aria-label="Loading">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce" />
-            <span className="w-2.5 h-2.5 rounded-full bg-teal-300 animate-bounce [animation-delay:120ms]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-bounce [animation-delay:240ms]" />
-          </div>
-          <button
-            type="button"
-            onClick={() => loadAppData()}
-            className="px-5 py-2 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-xs font-bold hover:bg-emerald-500/30 active:scale-95 transition-all"
-          >
-            නැවත උත්සාහ කරන්න (Retry)
-          </button>
+        {/* Elegant loader dots */}
+        <div className="mt-7 flex items-center gap-2" aria-label="Loading">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce" />
+          <span className="w-2.5 h-2.5 rounded-full bg-teal-300 animate-bounce [animation-delay:120ms]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-bounce [animation-delay:240ms]" />
         </div>
       </div>
     );
