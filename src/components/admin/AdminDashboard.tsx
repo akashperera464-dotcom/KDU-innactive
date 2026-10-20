@@ -125,9 +125,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onResolve={onUpdateSupplier}
           />
 
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-extrabold tracking-[0.2em]">
             <Sprout className="w-4 h-4 animate-spin text-emerald-400" />
-            <span>KDU Group Ceylon Tea Operations • Live Server</span>
+            <span>KDU GROUP</span>
           </div>
         </div>
       </div>

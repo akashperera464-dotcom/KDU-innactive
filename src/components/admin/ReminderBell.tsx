@@ -49,7 +49,8 @@ export const ReminderBell: React.FC<ReminderBellProps> = ({ suppliers, entries, 
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div
-            className={`absolute right-0 top-12 z-50 w-[min(92vw,420px)] max-h-[70vh] overflow-y-auto rounded-3xl border shadow-2xl p-4 space-y-3 ${
+            className={`fixed inset-x-4 top-20 z-50 mx-auto w-auto max-w-md max-h-[70vh] overflow-y-auto rounded-3xl border shadow-2xl p-4 space-y-3
+              sm:absolute sm:inset-x-auto sm:top-12 sm:right-0 sm:mx-0 sm:w-[420px] sm:max-w-none ${
               isDark ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-slate-200 text-slate-900"
             }`}
           >
