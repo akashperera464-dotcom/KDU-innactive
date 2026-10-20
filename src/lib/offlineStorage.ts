@@ -141,6 +141,52 @@ export function setStoredTheme(theme: "dark" | "light"): void {
   localStorage.setItem(THEME_KEY, theme);
 }
 
+/* ---------- Offline collector credentials ----------
+ * After a successful ONLINE collector login we cache the credential locally
+ * (base64-obfuscated) so the officer can still sign in while the plantation
+ * has no signal. Refreshed on every successful online login. */
+const CREDS_KEY = "kdu_offline_creds";
+
+export interface OfflineCred {
+  name: string;
+  pass: string; // base64 of the password
+  user: any; // cached UserType snapshot
+}
+
+const encode = (s: string) => {
+  try {
+    return btoa(unescape(encodeURIComponent(s)));
+  } catch {
+    return s;
+  }
+};
+
+export function getOfflineCreds(): OfflineCred[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(CREDS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+export function saveOfflineCred(password: string, user: any): void {
+  if (typeof window === "undefined") return;
+  try {
+    const list = getOfflineCreds().filter((c) => c.name !== user.name);
+    list.push({ name: user.name, pass: encode(password), user });
+    localStorage.setItem(CREDS_KEY, JSON.stringify(list));
+  } catch {}
+}
+
+export function matchOfflineCred(name: string, password: string): any | null {
+  const cred = getOfflineCreds().find(
+    (c) => c.name.toLowerCase() === String(name).trim().toLowerCase()
+  );
+  if (cred && cred.pass === encode(password)) return cred.user;
+  return null;
+}
+
 export async function syncOfflineQueueToServer(): Promise<{ success: boolean; syncedCount: number }> {
   const queue = getOfflineQueue();
   if (queue.length === 0) {

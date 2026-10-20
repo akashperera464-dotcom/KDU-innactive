@@ -5,43 +5,56 @@ export const dynamic = "force-dynamic";
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+/**
+ * Collector (Leaf Collector) login: Name + Password.
+ * The password is the one the Admin assigned in Users → Add/Edit User.
+ * (`employeeId` is still accepted as an alternative identifier for backwards
+ * compatibility with older clients / offline caches.)
+ */
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, employeeId } = body;
+    const { name, password, employeeId } = body;
 
-    if (!employeeId || !String(employeeId).trim()) {
+    const identifier = String(name || employeeId || "").trim();
+    if (!identifier) {
       return NextResponse.json(
-        { success: false, message: "සේවක අංකය ඇතුලත් කරන්න (Employee ID is required)" },
+        { success: false, message: "නම ඇතුලත් කරන්න (Name is required)" },
+        { status: 400 }
+      );
+    }
+    if (!password || !String(password).length) {
+      return NextResponse.json(
+        { success: false, message: "මුරපදය ඇතුලත් කරන්න (Password is required)" },
         { status: 400 }
       );
     }
 
-    const cleanId = String(employeeId).trim();
     const db = await getMongo();
 
     const user = await db.collection("users").findOne({
       role: "collector",
-      employeeId: { $regex: new RegExp(`^${escapeRegex(cleanId)}$`, "i") },
+      $or: [
+        { name: { $regex: new RegExp(`^${escapeRegex(identifier)}$`, "i") } },
+        { employeeId: { $regex: new RegExp(`^${escapeRegex(identifier)}$`, "i") } },
+      ],
     });
 
     if (!user) {
       return NextResponse.json(
         {
           success: false,
-          message: "මෙම සේවක අංකය ලියාපදිංචි වී නොමැත (Employee ID not registered as a Leaf Collector)",
+          message:
+            "මෙම නම ලියාපදිංචි වී නොමැත (Name not registered as a Leaf Collector)",
         },
         { status: 401 }
       );
     }
 
-    if (name && String(name).trim() && user.name.toLowerCase() !== String(name).trim().toLowerCase()) {
+    if (user.password !== String(password)) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "තෝරාගත් නම සහ සේවක අංකය ගැලපෙන්නේ නැත (Name and Employee ID do not match)",
-        },
-        { status: 403 }
+        { success: false, message: "මුරපදය වැරදියි (Invalid password)" },
+        { status: 401 }
       );
     }
 

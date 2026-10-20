@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Leaf, ShieldHalf, User, Lock, ArrowLeft } from "lucide-react";
+import { Leaf, ShieldHalf, User, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { User as UserType } from "@/types";
 
 export const KDU_LOGO_URL =
@@ -143,24 +143,19 @@ export const CollectorLoginScreen: React.FC<{
   onToggleTheme: () => void;
   onBack: () => void;
   collectors: UserType[];
-  onLogin: (name: string, employeeId: string) => Promise<string | null>;
+  onLogin: (name: string, password: string) => Promise<string | null>;
 }> = ({ theme, onToggleTheme, onBack, collectors, onLogin }) => {
   const [name, setName] = useState("");
-  const [employeeId, setEmployeeId] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const handlePickName = (picked: string) => {
-    setName(picked);
-    const match = collectors.find((c) => c.name === picked);
-    if (match) setEmployeeId(match.employeeId);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const err = await onLogin(name, employeeId);
+    const err = await onLogin(name, password);
     setLoading(false);
     if (err) setError(err);
   };
@@ -209,7 +204,7 @@ export const CollectorLoginScreen: React.FC<{
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/80 pointer-events-none" />
                   <select
                     value={name}
-                    onChange={(e) => handlePickName(e.target.value)}
+                    onChange={(e) => setName(e.target.value)}
                     required
                     className="w-full appearance-none pl-12 pr-4 py-4 rounded-2xl bg-white/10 border border-white/30 backdrop-blur-md text-white text-base font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   >
@@ -240,19 +235,30 @@ export const CollectorLoginScreen: React.FC<{
 
             <div>
               <label className="block text-sm font-extrabold text-white mb-2 drop-shadow">
-                සේවක අංකය (Employee ID)
+                මුරපදය (Password)
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/80 pointer-events-none" />
                 <input
-                  type="text"
-                  value={employeeId}
-                  onChange={(e) => setEmployeeId(e.target.value)}
-                  placeholder="EMP001"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
                   required
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/10 border border-white/30 backdrop-blur-md text-white placeholder-white/50 text-base font-medium tracking-wider focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  className="w-full pl-12 pr-12 py-4 rounded-2xl bg-white/10 border border-white/30 backdrop-blur-md text-white placeholder-white/50 text-base font-medium tracking-widest focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label="Show / hide password"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
+              <p className="mt-1.5 text-[11px] text-white/60">
+                පරිපාලකයා ලබාදුන් මුරපදය ඇතුලත් කරන්න (Use the password issued by your Admin)
+              </p>
             </div>
 
             {error && (

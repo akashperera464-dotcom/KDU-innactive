@@ -29,6 +29,8 @@ import {
   setStoredUser,
   getStoredTheme,
   setStoredTheme,
+  saveOfflineCred,
+  matchOfflineCred,
 } from "@/lib/offlineStorage";
 import { Leaf, WifiOff } from "lucide-react";
 import { KDU_LOGO_URL } from "@/components/auth/AuthFlow";
@@ -181,15 +183,18 @@ export default function Home() {
   }, [loadAppData]);
 
   /* ---------- Auth handlers ---------- */
-  const handleFieldLogin = async (name: string, employeeId: string): Promise<string | null> => {
+  /** Collector login: Name + Password (password set by Admin in Users). */
+  const handleFieldLogin = async (name: string, password: string): Promise<string | null> => {
     try {
       const res = await fetch("/api/auth/field-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, employeeId }),
+        body: JSON.stringify({ name, password }),
       });
       const data = await res.json();
       if (data.success && data.user) {
+        // Cache credential so the officer can log in offline next time
+        saveOfflineCred(password, data.user);
         setUser(data.user);
         setStoredUser(data.user);
         setActiveView("collector");
@@ -197,21 +202,16 @@ export default function Home() {
       }
       return data.message || "පිවිසීම අසාර්ථකයි (Login failed)";
     } catch {
-      // Offline fallback for known demo officers
-      if (employeeId.trim() === "Nandima" || employeeId.trim() === "Collector_1") {
-        const fallback: UserType = {
-          id: `u-${employeeId}`,
-          employeeId: employeeId.trim(),
-          name: employeeId.trim() === "Nandima" ? "Nandima Gunaratne" : "Saman Kumara",
-          role: "collector",
-          assignedRoute: employeeId.trim() === "Nandima" ? "OLUGALA" : "GONAKUMBURA",
-        };
-        setUser(fallback);
-        setStoredUser(fallback);
+      // Offline: verify against the locally cached credential from the
+      // officer's last successful online login.
+      const cachedUser = matchOfflineCred(name, password);
+      if (cachedUser) {
+        setUser(cachedUser);
+        setStoredUser(cachedUser);
         setActiveView("collector");
         return null;
       }
-      return "සම්බන්ධතාවය නොමැත. නොබැඳි පිවිසුම සඳහා Nandima / Collector_1 භාවිතා කරන්න.";
+      return "සම්බන්ධතාවය නොමැත — මෙම උපාංගයෙන් කලින් සාර්ථකව ලොග් වී නොමැති නම් නොබැඳි පිවිසුම කළ නොහැක. (No connection — offline login works only after one successful online login on this device.)";
     }
   };
 
