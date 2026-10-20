@@ -1,76 +1,92 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
 import "./globals.css";
 
-/* KDU GROUP brand assets (Cloudinary) */
-const KDU_LOGO_URL =
-  "https://res.cloudinary.com/dhd06wdov/image/upload/v1781669562/logokdu_xo5m6f.png";
+/*
+ * Brand assets are SELF-HOSTED in /public so social crawlers (WhatsApp,
+ * Facebook, Telegram…) always get a fast, same-origin image — no third-party
+ * dependency, no slow first-fetch timeouts that break link previews.
+ *   /kdu-logo.png  → favicon, apple-touch-icon (square crest)
+ *   /og-image.png  → 1200×630 share card (crest on dark emerald canvas)
+ */
 
-/* 1200x630 branded share image: logo centred on dark-emerald canvas */
-const KDU_OG_IMAGE =
-  "https://res.cloudinary.com/dhd06wdov/image/upload/w_1200,h_630,c_pad,g_center,b_rgb:052e21/v1781669562/logokdu_xo5m6f.png";
+const FALLBACK_HOST = "akashpereraproject27.vercel.app";
 
-const SITE_URL = "https://kdu-innactive.vercel.app";
+export async function generateMetadata(): Promise<Metadata> {
+  /* Resolve the real host at request time so og:* absolute URLs are correct
+     on every deployment (Vercel project domain, sandbox preview, custom). */
+  let base = `https://${FALLBACK_HOST}`;
+  try {
+    const h = await headers();
+    const host = h.get("x-forwarded-host") || h.get("host");
+    const proto = h.get("x-forwarded-proto") || "https";
+    if (host) base = `${proto}://${host}`;
+  } catch {
+    /* headers unavailable (static generation) — keep fallback */
+  }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: "KDU GROUP - Field Extension Officer & Admin Portal",
-  description:
-    "KDU GROUP Ceylon Tea — offline-capable field data collection, Rainforest Alliance audits and admin analytics for tea smallholder operations.",
-  applicationName: "KDU GROUP",
-  authors: [{ name: "KDU GROUP" }],
-  keywords: [
-    "KDU",
-    "KDU GROUP",
-    "tea factory",
-    "Ceylon tea",
-    "extension officer",
-    "Rainforest Alliance",
-    "field data collection",
-  ],
+  const title = "KDU GROUP 🍃 Ceylon Tea Field Portal";
+  const description =
+    "ව්‍යාප්ති නිලධාරී සහ පරිපාලන පද්ධතිය — offline field data capture, Rainforest Alliance audits & live analytics for KDU tea factories.";
 
-  /* Browser tab icon + phone home-screen icon */
-  icons: {
-    icon: [{ url: KDU_LOGO_URL, type: "image/png" }],
-    shortcut: [KDU_LOGO_URL],
-    apple: [{ url: KDU_LOGO_URL, sizes: "180x180", type: "image/png" }],
-    other: [{ rel: "mask-icon", url: KDU_LOGO_URL }],
-  },
-
-  /* Link previews: WhatsApp, Facebook, Messenger, Telegram, LinkedIn… */
-  openGraph: {
-    type: "website",
-    siteName: "KDU GROUP",
-    title: "KDU GROUP 🍃 Ceylon Tea Field Portal",
-    description:
-      "ව්‍යාප්ති නිලධාරී සහ පරිපාලන පද්ධතිය — offline field data capture, RA audits & live analytics for KDU tea factories.",
-    url: SITE_URL,
-    locale: "en_US",
-    images: [
-      {
-        url: KDU_OG_IMAGE,
-        width: 1200,
-        height: 630,
-        alt: "KDU GROUP — Ceylon Tea Field Extension & Admin Portal",
-      },
+  return {
+    metadataBase: new URL(base),
+    title: "KDU GROUP - Field Extension Officer & Admin Portal",
+    description,
+    applicationName: "KDU GROUP",
+    authors: [{ name: "KDU GROUP" }],
+    keywords: [
+      "KDU",
+      "KDU GROUP",
+      "tea factory",
+      "Ceylon tea",
+      "extension officer",
+      "Rainforest Alliance",
+      "field data collection",
     ],
-  },
 
-  /* X / Twitter card */
-  twitter: {
-    card: "summary_large_image",
-    title: "KDU GROUP 🍃 Ceylon Tea Field Portal",
-    description:
-      "Offline field data capture, Rainforest Alliance audits & live analytics for KDU tea factories.",
-    images: [KDU_OG_IMAGE],
-  },
+    /* Browser tab icon + phone home-screen icon (same-origin) */
+    icons: {
+      icon: [{ url: "/kdu-logo.png", type: "image/png" }],
+      shortcut: ["/kdu-logo.png"],
+      apple: [{ url: "/kdu-logo.png", sizes: "180x180", type: "image/png" }],
+    },
 
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "KDU GROUP",
-  },
-};
+    /* Link previews: WhatsApp, Facebook, Messenger, Telegram, LinkedIn… */
+    openGraph: {
+      type: "website",
+      siteName: "KDU GROUP",
+      title,
+      description,
+      url: base,
+      locale: "en_US",
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: "KDU GROUP — Ceylon Tea Field Extension & Admin Portal",
+          type: "image/png",
+        },
+      ],
+    },
+
+    /* X / Twitter card */
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/og-image.png"],
+    },
+
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: "KDU GROUP",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
