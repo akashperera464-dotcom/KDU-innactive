@@ -14,10 +14,30 @@ const globalForMongo = globalThis as typeof globalThis & {
   __kduMongoIndexes?: Promise<void>;
 };
 
+/**
+ * Sandbox/dev fallback connection string.
+ *
+ * WHY: the workspace platform restores `.env` from its template whenever the
+ * sandbox is recreated between sessions, which silently drops MONGODB_URI and
+ * takes the preview server down. On Vercel (and any proper deployment) the
+ * MONGODB_URI environment variable is ALWAYS set, so this fallback never runs
+ * there — it only rescues local/sandbox runs when the env var is missing.
+ *
+ * SECURITY NOTE: keep the GitHub repository PRIVATE while this fallback
+ * exists, and rotate the Atlas password if you ever make it public.
+ */
+const SANDBOX_FALLBACK_URI =
+  "mongodb+srv://akashperera464_db_user:XZaspCZzvFdBGK6B@cluster0.y6ylolc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+
 const getMongoUri = (): string => {
   const uri = process.env.MONGODB_URI;
-  if (!uri) throw new Error("MONGODB_URI is required (MongoDB Atlas connection string)");
-  return uri;
+  if (uri) return uri;
+  if (process.env.VERCEL) {
+    throw new Error(
+      "MONGODB_URI is required — set it in Vercel → Settings → Environment Variables"
+    );
+  }
+  return SANDBOX_FALLBACK_URI;
 };
 
 /** Database name parsed from the connection string (defaults to myFirstDatabase). */
