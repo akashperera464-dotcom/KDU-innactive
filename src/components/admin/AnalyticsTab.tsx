@@ -58,8 +58,8 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
   // Details Modal
   const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
 
-  // Export scope: which record type the CSV / Excel buttons should contain
-  const [exportScope, setExportScope] = useState<"all" | "inactive" | "extension">("all");
+  // Record-type filter: controls the Data Collection Records table AND exports
+  const [typeFilter, setTypeFilter] = useState<"all" | "inactive" | "extension">("all");
 
   // Compute Filtered Entries
   const filteredEntries = useMemo(() => {
@@ -96,26 +96,26 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
     });
   }, [entries, timeRange, selectedCollector, selectedRoute, searchQuery]);
 
-  /* ---------- Export scope: rows that go into CSV / Excel ---------- */
-  const exportData = useMemo(() => {
-    if (exportScope === "all") return filteredEntries;
-    return filteredEntries.filter((e) => e.type === exportScope);
-  }, [filteredEntries, exportScope]);
+  /* ---------- Record-type filter: rows shown in the table & exported ---------- */
+  const tableEntries = useMemo(() => {
+    if (typeFilter === "all") return filteredEntries;
+    return filteredEntries.filter((e) => e.type === typeFilter);
+  }, [filteredEntries, typeFilter]);
 
   const inactiveCount = filteredEntries.filter((e) => e.type === "inactive").length;
   const extensionCountFiltered = filteredEntries.filter((e) => e.type === "extension").length;
 
   const scopeFileTag =
-    exportScope === "inactive"
+    typeFilter === "inactive"
       ? "KDU_Inactive_Suppliers"
-      : exportScope === "extension"
+      : typeFilter === "extension"
         ? "KDU_Extension_RA_Visits"
         : "KDU_All_Records";
 
   const scopeLabel =
-    exportScope === "inactive"
+    typeFilter === "inactive"
       ? "Inactive"
-      : exportScope === "extension"
+      : typeFilter === "extension"
         ? "Extension / RA"
         : "All";
 
@@ -404,40 +404,11 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           />
         </div>
 
-        {/* Export Suite: scope selector + type-aware buttons */}
+        {/* Export Suite: type-aware buttons (scope = table filter above) */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Which record type to export */}
-          <div className={`flex items-center p-1 rounded-2xl border ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"}`}>
-            {(
-              [
-                { id: "all", label: `All (${filteredEntries.length})` },
-                { id: "inactive", label: `Inactive (${inactiveCount})` },
-                { id: "extension", label: `Ext / RA (${extensionCountFiltered})` },
-              ] as const
-            ).map((opt) => (
-              <button
-                key={opt.id}
-                onClick={() => setExportScope(opt.id)}
-                className={`px-3 py-2 rounded-xl text-[11px] font-extrabold transition-all ${
-                  exportScope === opt.id
-                    ? opt.id === "inactive"
-                      ? "bg-amber-500 text-slate-950 shadow"
-                      : opt.id === "extension"
-                        ? "bg-blue-500 text-white shadow"
-                        : "bg-emerald-600 text-white shadow"
-                    : isDark
-                      ? "text-slate-400 hover:text-white"
-                      : "text-slate-600 hover:text-black"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-
           {/* Export CSV Button (#10B981 vibrant green) */}
           <button
-            onClick={() => exportToCsv(exportData, scopeFileTag)}
+            onClick={() => exportToCsv(tableEntries, scopeFileTag)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm text-white bg-[#10B981] hover:bg-emerald-500 shadow-lg shadow-emerald-500/30 active:scale-95 transition-all"
             title={`Download CSV — ${scopeLabel} records only`}
           >
@@ -447,7 +418,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
 
           {/* Export Excel Button (#0F766E dark teal) */}
           <button
-            onClick={() => exportToExcel(exportData, scopeFileTag)}
+            onClick={() => exportToExcel(tableEntries, scopeFileTag)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm text-white bg-[#0F766E] hover:bg-teal-700 shadow-lg shadow-teal-700/30 active:scale-95 transition-all"
             title={`Download Excel — ${scopeLabel} records only`}
           >
@@ -463,10 +434,40 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
       <div className={`rounded-3xl border overflow-hidden ${
         isDark ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-200 shadow-md"
       }`}>
-        <div className="p-4 border-b border-emerald-500/10 flex items-center justify-between">
+        <div className="p-4 border-b border-emerald-500/10 flex flex-wrap items-center justify-between gap-3">
           <h4 className="font-bold text-sm text-emerald-400">
-            ක්ෂේත්‍ර වාර්තා ලැයිස්තුව (Data Collection Records) - {filteredEntries.length} Records
+            ක්ෂේත්‍ර වාර්තා ලැයිස්තුව (Data Collection Records) - {tableEntries.length} Records
           </h4>
+
+          {/* Record-type filter pills: All / Inactive / Ext-RA */}
+          <div className={`flex items-center p-1 rounded-2xl border ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"}`}>
+            {(
+              [
+                { id: "all", label: `All (${filteredEntries.length})` },
+                { id: "inactive", label: `Inactive (${inactiveCount})` },
+                { id: "extension", label: `Ext / RA (${extensionCountFiltered})` },
+              ] as const
+            ).map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => setTypeFilter(opt.id)}
+                title={`පෙන්වන්න: ${opt.label} වාර්තා පමණි`}
+                className={`px-3 py-2 rounded-xl text-[11px] font-extrabold transition-all ${
+                  typeFilter === opt.id
+                    ? opt.id === "inactive"
+                      ? "bg-amber-500 text-slate-950 shadow"
+                      : opt.id === "extension"
+                        ? "bg-blue-500 text-white shadow"
+                        : "bg-emerald-600 text-white shadow"
+                    : isDark
+                      ? "text-slate-400 hover:text-white"
+                      : "text-slate-600 hover:text-black"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -486,7 +487,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-emerald-500/10">
-              {filteredEntries.map((item) => (
+              {tableEntries.map((item) => (
                 <tr
                   key={item.id}
                   className={`hover:bg-emerald-500/5 transition-colors cursor-pointer ${
@@ -593,6 +594,13 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
                   </td>
                 </tr>
               ))}
+              {tableEntries.length === 0 && (
+                <tr>
+                  <td colSpan={8} className={`px-4 py-10 text-center text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                    මෙම පෙරහන යටතේ වාර්තා නොමැත (No records match the current filters)
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
