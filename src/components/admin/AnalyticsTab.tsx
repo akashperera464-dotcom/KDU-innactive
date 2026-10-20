@@ -58,6 +58,9 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
   // Details Modal
   const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
 
+  // Export scope: which record type the CSV / Excel buttons should contain
+  const [exportScope, setExportScope] = useState<"all" | "inactive" | "extension">("all");
+
   // Compute Filtered Entries
   const filteredEntries = useMemo(() => {
     const todayStr = new Date().toISOString().split("T")[0];
@@ -92,6 +95,29 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
       return true;
     });
   }, [entries, timeRange, selectedCollector, selectedRoute, searchQuery]);
+
+  /* ---------- Export scope: rows that go into CSV / Excel ---------- */
+  const exportData = useMemo(() => {
+    if (exportScope === "all") return filteredEntries;
+    return filteredEntries.filter((e) => e.type === exportScope);
+  }, [filteredEntries, exportScope]);
+
+  const inactiveCount = filteredEntries.filter((e) => e.type === "inactive").length;
+  const extensionCountFiltered = filteredEntries.filter((e) => e.type === "extension").length;
+
+  const scopeFileTag =
+    exportScope === "inactive"
+      ? "KDU_Inactive_Suppliers"
+      : exportScope === "extension"
+        ? "KDU_Extension_RA_Visits"
+        : "KDU_All_Records";
+
+  const scopeLabel =
+    exportScope === "inactive"
+      ? "Inactive"
+      : exportScope === "extension"
+        ? "Extension / RA"
+        : "All";
 
   // KPI Calculations
   const totalEntries = filteredEntries.length;
@@ -378,26 +404,55 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           />
         </div>
 
-        {/* Export Suite Buttons as specified */}
-        <div className="flex items-center gap-2">
+        {/* Export Suite: scope selector + type-aware buttons */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Which record type to export */}
+          <div className={`flex items-center p-1 rounded-2xl border ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"}`}>
+            {(
+              [
+                { id: "all", label: `All (${filteredEntries.length})` },
+                { id: "inactive", label: `Inactive (${inactiveCount})` },
+                { id: "extension", label: `Ext / RA (${extensionCountFiltered})` },
+              ] as const
+            ).map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => setExportScope(opt.id)}
+                className={`px-3 py-2 rounded-xl text-[11px] font-extrabold transition-all ${
+                  exportScope === opt.id
+                    ? opt.id === "inactive"
+                      ? "bg-amber-500 text-slate-950 shadow"
+                      : opt.id === "extension"
+                        ? "bg-blue-500 text-white shadow"
+                        : "bg-emerald-600 text-white shadow"
+                    : isDark
+                      ? "text-slate-400 hover:text-white"
+                      : "text-slate-600 hover:text-black"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
           {/* Export CSV Button (#10B981 vibrant green) */}
           <button
-            onClick={() => exportToCsv(filteredEntries, "KDU_Tea_Data")}
+            onClick={() => exportToCsv(exportData, scopeFileTag)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm text-white bg-[#10B981] hover:bg-emerald-500 shadow-lg shadow-emerald-500/30 active:scale-95 transition-all"
-            title="Download CSV"
+            title={`Download CSV — ${scopeLabel} records only`}
           >
             <Share2 className="w-4 h-4" />
-            <span>Export CSV</span>
+            <span>Export CSV · {scopeLabel}</span>
           </button>
 
           {/* Export Excel Button (#0F766E dark teal) */}
           <button
-            onClick={() => exportToExcel(filteredEntries, "KDU_Tea_Records")}
+            onClick={() => exportToExcel(exportData, scopeFileTag)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm text-white bg-[#0F766E] hover:bg-teal-700 shadow-lg shadow-teal-700/30 active:scale-95 transition-all"
-            title="Download Excel Workbook"
+            title={`Download Excel — ${scopeLabel} records only`}
           >
             <FileSpreadsheet className="w-4 h-4" />
-            <span>Export Excel</span>
+            <span>Export Excel · {scopeLabel}</span>
           </button>
         </div>
       </div>

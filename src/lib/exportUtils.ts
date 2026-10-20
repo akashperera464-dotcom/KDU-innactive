@@ -154,7 +154,10 @@ export function exportToExcel(data: Entry[], filename = "KDU_Tea_Factory_Data") 
   worksheet["!cols"] = colWidths;
 
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "KDU Field Data");
+  // Sheet tab name mirrors the exported record type (Excel limit: 31 chars)
+  const sheetName =
+    filename.replace(/[^A-Za-z0-9_ ]/g, " ").trim().slice(0, 31) || "KDU Field Data";
+  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
   const dateStr = new Date().toISOString().split("T")[0];
   XLSX.writeFile(workbook, `${filename}_${dateStr}.xlsx`);
