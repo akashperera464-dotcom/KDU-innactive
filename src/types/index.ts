@@ -44,7 +44,8 @@ export interface User {
   id: string;
   employeeId: string;
   name: string;
-  role: "admin" | "collector";
+  role: "admin" | "collector"; // display label: "Extension Officer"
+  assignedFactory?: string | null;
   assignedRoute?: string | null;
   createdAt?: string | Date | null;
 }

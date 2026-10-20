@@ -191,7 +191,7 @@ export const CollectorLoginScreen: React.FC<{
           <h1 className="text-center text-4xl font-extrabold text-white drop-shadow-lg">පිවිසුම</h1>
           <p className="mt-2 mb-8 text-center text-emerald-300 font-bold text-sm flex items-center justify-center gap-1.5 drop-shadow">
             <Leaf className="w-4 h-4" fill="currentColor" strokeWidth={1} />
-            <span>දළු එකතු කරන්නා (Leaf Collector)</span>
+            <span>ව්‍යාප්ති නිලධාරී පිවිසුම (Extension Login)</span>
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -256,9 +256,6 @@ export const CollectorLoginScreen: React.FC<{
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              <p className="mt-1.5 text-[11px] text-white/60">
-                පරිපාලකයා ලබාදුන් මුරපදය ඇතුලත් කරන්න (Use the password issued by your Admin)
-              </p>
             </div>
 
             {error && (

@@ -196,7 +196,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               isDark ? "bg-slate-800 border border-slate-700 text-white" : "bg-slate-100 border border-slate-300 text-slate-900"
             }`}
           >
-            <option value="all">සියලු නිලධාරීන් (All Collectors)</option>
+            <option value="all">සියලු නිලධාරීන් (All Extension Officers)</option>
             {users.filter(u => u.role === "collector").map((u) => (
               <option key={u.id} value={u.name || u.employeeId}>
                 {u.name} ({u.employeeId})
@@ -422,7 +422,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               <tr>
                 <th className="px-4 py-3 font-bold">සැපයුම්කරු (Supplier)</th>
                 <th className="px-4 py-3 font-bold">මාර්ගය (Route)</th>
-                <th className="px-4 py-3 font-bold">නිලධාරී (Collector)</th>
+                <th className="px-4 py-3 font-bold">ව්‍යාප්ති නිලධාරී (Ext. Officer)</th>
                 <th className="px-4 py-3 font-bold">දිනය & වේලාව (Timestamp)</th>
                 <th className="px-4 py-3 font-bold">ස්ථානය (GPS Location)</th>
                 <th className="px-4 py-3 font-bold">තත්ත්වය / හේතුව (Status)</th>

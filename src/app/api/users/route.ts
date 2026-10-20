@@ -21,7 +21,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { employeeId, name, role, assignedRoute, password } = body;
+    const { employeeId, name, role, assignedFactory, assignedRoute, password } = body;
 
     if (!employeeId || !name || !role) {
       return NextResponse.json(
@@ -35,7 +35,8 @@ export async function POST(req: Request) {
       employeeId: String(employeeId).trim(),
       name: String(name).trim(),
       role: String(role).trim(),
-      assignedRoute: assignedRoute?.trim() || "ALL",
+      assignedFactory: assignedFactory?.trim() || null,
+      assignedRoute: assignedRoute?.trim() || null,
       password: password?.trim() || "123",
     };
 

@@ -364,6 +364,21 @@ export default function Home() {
     } catch {}
   };
 
+  /* Full edit (Admin → Users → Edit) */
+  const handleUpdateUser = async (
+    id: string,
+    patch: Partial<UserType> & { password?: string }
+  ) => {
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...patch } : u)));
+    try {
+      await fetch(`/api/users/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+    } catch {}
+  };
+
   const handleAddSupplier = async (newSup: Partial<Supplier>) => {
     try {
       const res = await fetch("/api/suppliers", {
@@ -562,6 +577,7 @@ export default function Home() {
               onRefresh={loadAppData}
               onDeleteEntry={handleDeleteEntry}
               onAddUser={handleAddUser}
+              onUpdateUser={handleUpdateUser}
               onDeleteUser={handleDeleteUser}
               onAddSupplier={handleAddSupplier}
               onBulkAddSuppliers={handleBulkAddSuppliers}

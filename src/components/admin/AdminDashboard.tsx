@@ -35,6 +35,7 @@ interface AdminDashboardProps {
   onRefresh: () => void;
   onDeleteEntry: (id: string) => Promise<void>;
   onAddUser: (user: Partial<UserType> & { password?: string }) => Promise<void>;
+  onUpdateUser: (id: string, patch: Partial<UserType> & { password?: string }) => Promise<void>;
   onDeleteUser: (id: string) => Promise<void>;
   onAddSupplier: (supplier: Partial<Supplier>) => Promise<void>;
   onBulkAddSuppliers: (items: Partial<Supplier>[], defaultStatus: string) => Promise<{ imported: number; skipped: number }>;
@@ -60,6 +61,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onRefresh,
   onDeleteEntry,
   onAddUser,
+  onUpdateUser,
   onDeleteUser,
   onAddSupplier,
   onBulkAddSuppliers,
@@ -149,6 +151,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           users={users}
           routes={routes}
           onAddUser={onAddUser}
+          onUpdateUser={onUpdateUser}
           onDeleteUser={onDeleteUser}
           theme={theme}
         />

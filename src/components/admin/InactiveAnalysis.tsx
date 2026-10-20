@@ -76,7 +76,7 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
       "Admin Reason (Expected)",
       "Field Visited?",
       "Last Visit Date",
-      "Collector",
+      "Extension Officer",
       "Field Reason (Actual)",
       "Will Give Leaves?",
       "Reason Match?",

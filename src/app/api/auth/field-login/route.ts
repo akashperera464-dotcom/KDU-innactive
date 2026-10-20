@@ -65,6 +65,7 @@ export async function POST(req: Request) {
         employeeId: user.employeeId,
         name: user.name,
         role: user.role,
+        assignedFactory: user.assignedFactory || null,
         assignedRoute: user.assignedRoute,
       },
     });

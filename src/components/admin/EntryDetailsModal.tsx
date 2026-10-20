@@ -89,7 +89,7 @@ export const EntryDetailsModal: React.FC<EntryDetailsModalProps> = ({
               <span className="font-semibold">{entry.date} {entry.time}</span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 block">නිලධාරී (Collector)</span>
+              <span className="text-[10px] text-slate-400 block">ව්‍යාප්ති නිලධාරී (Ext. Officer)</span>
               <span className="font-semibold">{entry.collectorId}</span>
             </div>
             <div>

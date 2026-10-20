@@ -125,9 +125,13 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
   const [gpsStage, setGpsStage] = useState<"idle" | "acquiring" | "locked" | "failed">("idle");
   const [pendingGps, setPendingGps] = useState<GpsResult | null>(null);
 
-  // Form 1
-  const [factory, setFactory] = useState("සියල්ල (All Factories)");
-  const [route, setRoute] = useState(user.assignedRoute && user.assignedRoute !== "ALL" ? user.assignedRoute : "OLUGALA");
+  // Form 1 — preselect the factory / route the Admin assigned to this officer
+  const [factory, setFactory] = useState(
+    user.assignedFactory ? user.assignedFactory : "සියල්ල (All Factories)"
+  );
+  const [route, setRoute] = useState(
+    user.assignedRoute && user.assignedRoute !== "ALL" ? user.assignedRoute : ""
+  );
   const [supplierNo, setSupplierNo] = useState("");
   const [supplierName, setSupplierName] = useState("");
   const [nic, setNic] = useState("");
