@@ -26,14 +26,12 @@ export async function generateMetadata(): Promise<Metadata> {
     /* headers unavailable (static generation) — keep fallback */
   }
 
-  const title = "KDU GROUP 🍃 Ceylon Tea Field Portal";
-  const description =
-    "ව්‍යාප්ති නිලධාරී සහ පරිපාලන පද්ධතිය — offline field data capture, Rainforest Alliance audits & live analytics for KDU tea factories.";
+  /* Share-card text (WhatsApp / Facebook / Telegram preview) */
+  const shareTitle = "KDU GROUP 🍃 Inactive Suppliers";
 
   return {
     metadataBase: new URL(base),
     title: "KDU GROUP - Field Extension Officer & Admin Portal",
-    description,
     applicationName: "KDU GROUP",
     authors: [{ name: "KDU GROUP" }],
     keywords: [
@@ -53,12 +51,12 @@ export async function generateMetadata(): Promise<Metadata> {
       apple: [{ url: "/kdu-logo.png", sizes: "180x180", type: "image/png" }],
     },
 
-    /* Link previews: WhatsApp, Facebook, Messenger, Telegram, LinkedIn… */
+    /* Link previews: WhatsApp, Facebook, Messenger, Telegram, LinkedIn…
+       Title only — no description line (as requested). */
     openGraph: {
       type: "website",
       siteName: "KDU GROUP",
-      title,
-      description,
+      title: shareTitle,
       url: base,
       locale: "en_US",
       images: [
@@ -66,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: "/og-image.png",
           width: 1200,
           height: 630,
-          alt: "KDU GROUP — Ceylon Tea Field Extension & Admin Portal",
+          alt: "KDU GROUP 🍃 Inactive Suppliers",
           type: "image/png",
         },
       ],
@@ -75,8 +73,7 @@ export async function generateMetadata(): Promise<Metadata> {
     /* X / Twitter card */
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: shareTitle,
       images: ["/og-image.png"],
     },
 
