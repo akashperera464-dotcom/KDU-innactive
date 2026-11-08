@@ -85,6 +85,8 @@ export async function POST(req: Request) {
           route: raw.route ? String(raw.route).trim().toUpperCase() : null,
           factory: raw.factory ? String(raw.factory).trim() : null,
           previousReason: reason,
+          address: raw.address ? String(raw.address).trim() : null,
+          remarks: raw.remarks ? String(raw.remarks).trim() : null,
           lastWeightKg: raw.lastWeightKg ? String(raw.lastWeightKg) : "0",
           status: raw.status
             ? String(raw.status)
@@ -124,6 +126,8 @@ export async function POST(req: Request) {
       route,
       factory,
       previousReason,
+      address,
+      remarks,
       lastWeightKg,
       status,
       prunedDate,
@@ -145,6 +149,8 @@ export async function POST(req: Request) {
       route: route?.trim() || null,
       factory: factory?.trim() || null,
       previousReason: normalizeReason(previousReason),
+      address: address?.trim() || null,
+      remarks: remarks?.trim() || null,
       lastWeightKg: lastWeightKg?.trim() || "0",
       status: status || "active",
       prunedDate: prunedDate || null,

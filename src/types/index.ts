@@ -63,6 +63,8 @@ export interface Supplier {
   status?: string | null; // 'active' | 'inactive'
   prunedDate?: string | null; // YYYY-MM-DD garden pruned
   resolvedAt?: string | null; // YYYY-MM-DD reminder resolved
+  address?: string | null; // office Excel "Address" column
+  remarks?: string | null; // office Excel remarks column (col L)
 }
 
 export interface RouteItem {

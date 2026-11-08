@@ -18,6 +18,23 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Supplier, RouteItem } from "@/types";
+import { parseWorkbook, mapOfficeStatus } from "@/lib/officeImport";
+import { FACTORY_ROUTES } from "@/db/factoryRoutes";
+
+interface ImportRow extends Partial<Supplier> {
+  prunedDate?: string;
+  statusRaw?: string;
+  reasonId?: string | null;
+  term?: string;
+}
+
+const factoryOfRoute = (route?: string | null): string | null => {
+  if (!route) return null;
+  for (const [f, list] of Object.entries(FACTORY_ROUTES)) {
+    if (list.includes(route)) return f;
+  }
+  return null;
+};
 
 interface SupplierDirectoryTabProps {
   suppliers: Supplier[];
@@ -27,35 +44,6 @@ interface SupplierDirectoryTabProps {
   onUpdateSupplier: (id: string, patch: Partial<Supplier>) => Promise<void>;
   onDeleteSupplier: (id: string) => Promise<void>;
   theme: "dark" | "light";
-}
-
-/* ---------- flexible header mapping for Excel/CSV extraction ---------- */
-const HEADER_MAP: { field: keyof Supplier | "prunedDate"; keys: string[] }[] = [
-  { field: "supplierNo", keys: ["supplierno", "no", "number", "suppliernumber", "supplierid", "suppliercode", "id"] },
-  { field: "name", keys: ["name", "suppliername", "fullname", "supplier"] },
-  { field: "phone", keys: ["phone", "phonenumber", "telephone", "mobile", "contact", "tp", "phoneNo"] },
-  { field: "nic", keys: ["nic", "nicno", "idno", "nationalid"] },
-  { field: "route", keys: ["route", "tearoute", "routename"] },
-  { field: "factory", keys: ["factory", "factoryname"] },
-  { field: "previousReason", keys: ["reason", "status", "previousreason", "adminreason", "inactivereason"] },
-  { field: "lastWeightKg", keys: ["weight", "lastweight", "lastweightkg", "kg", "lastsuppliedweight", "lastsupplied"] },
-  { field: "prunedDate", keys: ["pruneddate", "prunedon", "කප්පාදුදිනය"] },
-];
-
-const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-
-function mapRow(raw: Record<string, any>): Partial<Supplier> & { prunedDate?: string } {
-  const out: Record<string, any> = {};
-  const entries = Object.entries(raw);
-  for (const { field, keys } of HEADER_MAP) {
-    for (const [k, v] of entries) {
-      if (keys.includes(norm(k)) && v !== undefined && String(v).trim() !== "") {
-        out[field] = String(v).trim();
-        break;
-      }
-    }
-  }
-  return out as Partial<Supplier> & { prunedDate?: string };
 }
 
 export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
@@ -83,12 +71,15 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
   const [lastWeightKg, setLastWeightKg] = useState("100.0");
   const [status, setStatus] = useState<"active" | "inactive">("active");
   const [prunedDate, setPrunedDate] = useState("");
+  const [address, setAddress] = useState("");
+  const [remarks, setRemarks] = useState("");
   const [loading, setLoading] = useState(false);
 
   // import modal
   const [showImport, setShowImport] = useState(false);
-  const [importRows, setImportRows] = useState<(Partial<Supplier> & { prunedDate?: string })[]>([]);
+  const [importRows, setImportRows] = useState<ImportRow[]>([]);
   const [importFileName, setImportFileName] = useState("");
+  const [parseInfo, setParseInfo] = useState("");
   const [importStatus, setImportStatus] = useState<"active" | "inactive">("inactive");
   const [pasteText, setPasteText] = useState("");
   const [importing, setImporting] = useState(false);
@@ -112,17 +103,41 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
 
   const inactiveCount = suppliers.filter((s) => (s.status || "active") === "inactive").length;
 
-  /* ---------- Excel / CSV extraction ---------- */
+  /* ---------- Office Excel / CSV extraction ---------- */
+  const applyParse = (res: ReturnType<typeof parseWorkbook>, label: string) => {
+    const mapped: ImportRow[] = res.rows.map((r) => {
+      const { reasonId, term } = mapOfficeStatus(r.statusRaw);
+      return {
+        supplierNo: r.supplierNo,
+        name: r.name,
+        phone: r.phone || undefined,
+        route: r.route || undefined,
+        factory: res.factory || factoryOfRoute(r.route) || undefined,
+        address: r.address || undefined,
+        remarks: r.remarks || undefined,
+        lastWeightKg: r.lastWeightKg || "0",
+        statusRaw: r.statusRaw,
+        term,
+        reasonId,
+      };
+    });
+    setImportRows(mapped);
+    setImportFileName(label);
+    setParseInfo(
+      `${res.format === "office" ? "🏢 Office format" : "📄 Generic format"}${
+        res.factory ? ` • 🏭 ${res.factory}` : ""
+      }${res.monthLabel ? ` • 📅 ${res.monthLabel}` : ""}${
+        res.headerRow ? ` • header row ${res.headerRow}` : ""
+      } • ${mapped.length} suppliers • ${res.skipped} subtotal/blank rows skipped`
+    );
+  };
+
   const handleFile = async (file: File) => {
     setImportResult("");
     try {
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf);
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: "" });
-      const mapped = json.map(mapRow).filter((r) => r.supplierNo || r.name);
-      setImportRows(mapped);
-      setImportFileName(file.name);
+      applyParse(parseWorkbook(wb), file.name);
     } catch (err: any) {
       setImportResult(`ගොනුව කියවීම අසාර්ථකයි (Failed to read file): ${err?.message || err}`);
     }
@@ -130,51 +145,67 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
 
   const handlePaste = () => {
     setImportResult("");
-    const lines = pasteText
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter(Boolean);
-    if (lines.length === 0) return;
-
-    const delim = lines[0].includes("\t") ? "\t" : lines[0].includes("|") ? "|" : ",";
-    const first = lines[0].split(delim).map((c) => c.trim());
-    const looksLikeHeader = first.some((c) => /no|name|phone|nic|route|factory|reason|weight/i.test(c));
-
-    const rows: (Partial<Supplier> & { prunedDate?: string })[] = [];
-    const start = looksLikeHeader ? 1 : 0;
-    for (let i = start; i < lines.length; i++) {
-      const cols = lines[i].split(delim).map((c) => c.trim());
-      if (looksLikeHeader) {
-        const obj: Record<string, any> = {};
-        first.forEach((h, idx) => (obj[h] = cols[idx] || ""));
-        rows.push(mapRow(obj));
-      } else {
-        rows.push({
-          supplierNo: cols[0],
-          name: cols[1],
-          phone: cols[2],
-          nic: cols[3],
-          route: cols[4],
-          factory: cols[5],
-          previousReason: cols[6],
-          lastWeightKg: cols[7],
-        });
-      }
+    if (!pasteText.trim()) return;
+    try {
+      const wb = XLSX.read(pasteText, { type: "string" });
+      applyParse(parseWorkbook(wb), "Pasted rows");
+    } catch (err: any) {
+      setImportResult(`ඇලවූ දත්ත කියවීම අසාර්ථකයි (Failed to parse pasted data): ${err?.message || err}`);
     }
-    const valid = rows.filter((r) => r.supplierNo && r.name);
-    setImportRows(valid);
-    setImportFileName(`Pasted ${valid.length} rows`);
   };
 
   const runImport = async () => {
     setImporting(true);
     setImportResult("");
-    const res = await onBulkAddSuppliers(importRows, importStatus);
-    setImporting(false);
-    setImportResult(`✅ ආයාත කළා: ${res.imported}ක් • මග හැරුණා: ${res.skipped}ක් (Imported ${res.imported}, skipped ${res.skipped})`);
-    setImportRows([]);
-    setPasteText("");
-    setTimeout(() => setShowImport(false), 1600);
+    try {
+      // 1) auto-create unknown office status words as new reasons
+      const autoTerms = Array.from(
+        new Set(importRows.filter((r) => !r.reasonId && r.term).map((r) => r.term as string))
+      );
+      const termToId: Record<string, string> = {};
+      for (const term of autoTerms) {
+        const id = term.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+        termToId[term] = id;
+        await fetch("/api/reasons", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, labelSi: term, labelEn: term, badgeColor: "#F59E0B" }),
+        });
+      }
+
+      // 2) final payloads
+      const today = new Date().toISOString().split("T")[0];
+      const payloads = importRows.map((r) => {
+        const reasonId = r.reasonId || (r.term ? termToId[r.term] : null);
+        return {
+          supplierNo: r.supplierNo,
+          name: r.name,
+          phone: r.phone,
+          route: r.route,
+          factory: r.factory,
+          address: r.address,
+          remarks: r.remarks,
+          lastWeightKg: r.lastWeightKg,
+          previousReason: reasonId || undefined,
+          status: importStatus,
+          prunedDate: reasonId === "garden_pruned" ? today : undefined,
+        };
+      });
+
+      const res = await onBulkAddSuppliers(payloads, importStatus);
+      setImportResult(
+        `✅ ආයාත කළා: ${res.imported}ක් • මග හැරුණා: ${res.skipped}ක් (Imported ${res.imported}, skipped ${res.skipped})` +
+          (autoTerms.length ? ` • 🆕 new reasons: ${autoTerms.join(", ")}` : "")
+      );
+      setImportRows([]);
+      setPasteText("");
+      setParseInfo("");
+      setTimeout(() => setShowImport(false), 1800);
+    } catch (err: any) {
+      setImportResult(`ආයාත කිරීම අසාර්ථකයි (Import failed): ${err?.message || err}`);
+    } finally {
+      setImporting(false);
+    }
   };
 
   /* ---------- single add/edit ---------- */
@@ -190,6 +221,8 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
     setLastWeightKg("100.0");
     setStatus("active");
     setPrunedDate("");
+    setAddress("");
+    setRemarks("");
     setShowModal(true);
   };
 
@@ -205,6 +238,8 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
     setLastWeightKg(s.lastWeightKg || "0");
     setStatus((s.status as any) || "active");
     setPrunedDate(s.prunedDate || "");
+    setAddress(s.address || "");
+    setRemarks(s.remarks || "");
     setShowModal(true);
   };
 
@@ -221,6 +256,8 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
       route,
       factory,
       previousReason,
+      address: address.trim() || undefined,
+      remarks: remarks.trim() || undefined,
       lastWeightKg,
       status,
       prunedDate: prunedDate || undefined,
@@ -322,10 +359,15 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
                   <tr key={s.id} className={`hover:bg-emerald-500/5 transition-colors ${isDark ? "text-slate-200" : "text-slate-800"}`}>
                     <td className="px-4 py-3 font-mono font-bold text-emerald-400">#{s.supplierNo}</td>
                     <td className="px-4 py-3 font-semibold">
-                      {s.name}
+                      <span title={s.address || undefined}>{s.name}</span>
                       <span className={`block text-[10px] font-normal ${isDark ? "text-slate-500" : "text-slate-400"}`}>
                         {s.previousReason || "—"}
                       </span>
+                      {s.remarks && (
+                        <span className="block text-[10px] font-bold text-amber-400 truncate max-w-[220px]" title={s.remarks}>
+                          ✎ {s.remarks}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-slate-400">{s.phone || "-"}</td>
                     <td className="px-4 py-3">
@@ -384,7 +426,10 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
                 <div>
                   <h3 className="font-bold text-base">කාර්යාල ලැයිස්තුව ආයාත කිරීම (Excel / CSV Import)</h3>
                   <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    Columns auto-detected: Supplier No | Name | Phone | NIC | Route | Factory | Reason | Weight | Pruned Date
+                    කාර්යාල Excel පෝරමය ස්වයංක්‍රීයව හඳුනාගනී: factory title row, month banner,
+                    "Route Name | Client Reg No | Name | Contact Number | Address | Total (Kg) | status | remarks"
+                    header ඕනෑම පේළියක තිබුණත් • හරිත subtotal පේළි ඉබේ මග හැරේ • ACTIVE / PRUNED / MORE BOOK /
+                    NOT CONNECTED / WILL GIVE / TRANSPORT ISSUE වචන system reasons වලට map වේ (නොදන්නා ඒවා අලුත් reason ලෙස සෑදේ).
                   </p>
                 </div>
               </div>
@@ -462,15 +507,22 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     {importFileName} — අස්ථානගත පේළි {importRows.length} ක් හමුවිය (extracted rows)
                   </div>
+                  {parseInfo && (
+                    <div className={`px-3.5 py-1.5 text-[10px] font-bold ${isDark ? "bg-slate-800/60 text-emerald-300" : "bg-emerald-50 text-emerald-700"}`}>
+                      {parseInfo}
+                    </div>
+                  )}
                   <div className="max-h-52 overflow-auto">
                     <table className="w-full text-left text-[11px]">
                       <thead className={isDark ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-600"}>
                         <tr>
-                          <th className="px-3 py-2">No</th>
+                          <th className="px-3 py-2">Reg No</th>
                           <th className="px-3 py-2">Name</th>
                           <th className="px-3 py-2">Phone</th>
                           <th className="px-3 py-2">Route</th>
-                          <th className="px-3 py-2">Reason</th>
+                          <th className="px-3 py-2">Kg</th>
+                          <th className="px-3 py-2">Office Status → Reason</th>
+                          <th className="px-3 py-2">Remarks</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-emerald-500/10">
@@ -480,7 +532,14 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
                             <td className="px-3 py-1.5">{r.name || "—"}</td>
                             <td className="px-3 py-1.5">{r.phone || "—"}</td>
                             <td className="px-3 py-1.5">{r.route || "—"}</td>
-                            <td className="px-3 py-1.5">{r.previousReason || "—"}</td>
+                            <td className="px-3 py-1.5 font-mono">{r.lastWeightKg || "0"}</td>
+                            <td className="px-3 py-1.5">
+                              <span className="font-bold">{r.statusRaw || "—"}</span>
+                              <span className={`block text-[9px] ${r.reasonId ? "text-emerald-400" : "text-amber-400"}`}>
+                                → {r.reasonId || `new: ${r.term}`}
+                              </span>
+                            </td>
+                            <td className="px-3 py-1.5 text-amber-500">{r.remarks || ""}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -590,6 +649,16 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
                   <label className="block text-xs font-semibold mb-1">අවසන් බර (Kg)</label>
                   <input type="number" step="0.1" value={lastWeightKg} onChange={(e) => setLastWeightKg(e.target.value)} className={`${inputCls} font-mono font-bold`} />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">ලිපිනය (Address)</label>
+                <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="E.g: 498A/1, MATUWAGALA" className={inputCls} />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">සටහන් (Office Remarks)</label>
+                <input type="text" value={remarks} onChange={(e) => setRemarks(e.target.value)} placeholder="E.g: 24KG HAVE TO PRUNE" className={inputCls} />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
