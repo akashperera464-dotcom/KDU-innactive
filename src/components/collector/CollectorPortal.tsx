@@ -593,7 +593,7 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto px-3 sm:px-5 pt-4 space-y-4">
+      <div className="max-w-2xl mx-auto px-3 sm:px-5 pt-4 pb-28 space-y-4">
         {/* Meta chips */}
         <div className="flex flex-wrap items-center gap-2">
           <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border ${isDark ? "bg-slate-900 border-slate-800 text-slate-300" : "bg-white border-emerald-100 text-emerald-800 shadow-sm"}`}>
@@ -706,24 +706,26 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
 
         {!showLogs && (
           <>
-            <form onSubmit={handleSubmit} className="space-y-4 pb-44">
+            <form onSubmit={handleSubmit} className="space-y-4 pb-6">
               {/* ================= INACTIVE SUPPLIERS — QUIZ / SLIDES ================= */}
               {formType === "inactive" && (
                 <div key={slideIdx} className={`${cardCls} animate-fadeIn`}>
-                  {/* Slide topic header */}
-                  <div className={`flex items-center gap-3 pb-3 mb-4 border-b ${isDark ? "border-slate-800" : "border-emerald-100"}`}>
-                    <div className={`w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center ${isDark ? "bg-emerald-500/15 text-emerald-300" : "bg-emerald-600/10 text-emerald-700"}`}>
-                      <CurrentSlideIcon className="w-5 h-5" />
+                  {/* Compact step header — one clean line */}
+                  <div className={`flex items-center gap-2.5 pb-2.5 mb-4 border-b ${isDark ? "border-slate-800" : "border-emerald-100"}`}>
+                    <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center ${isDark ? "bg-emerald-500/15 text-emerald-300" : "bg-emerald-600/10 text-emerald-700"}`}>
+                      <CurrentSlideIcon className="w-4 h-4" />
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-extrabold tracking-wider text-emerald-500">
-                        පියවර {slideIdx + 1} / {totalSlides} • STEP {slideIdx + 1} OF {totalSlides}
-                      </p>
-                      <h3 className={`text-sm font-extrabold leading-tight ${isDark ? "text-white" : "text-emerald-900"}`}>
-                        {slides[slideIdx].titleSi} ({slides[slideIdx].titleEn})
-                      </h3>
-                      <p className={`text-[11px] mt-0.5 leading-snug ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                        {slides[slideIdx].desc}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className={`text-[13px] font-extrabold truncate ${isDark ? "text-white" : "text-emerald-900"}`}>
+                          {slides[slideIdx].titleSi}
+                        </h3>
+                        <span className={`shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full ${isDark ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-emerald-600/10 text-emerald-700 border border-emerald-200"}`}>
+                          {slideIdx + 1}/{totalSlides}
+                        </span>
+                      </div>
+                      <p className={`text-[10px] truncate ${isDark ? "text-slate-500" : "text-slate-500"}`}>
+                        {slides[slideIdx].titleEn} — {slides[slideIdx].desc}
                       </p>
                     </div>
                   </div>
@@ -1063,88 +1065,94 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
             )}
           </form>
 
-          {/* ---------- Progress dock: fixed, OUTSIDE form so it doesn't overlap content ---------- */}
-          {formType === "inactive" && (
-            <div className="fixed bottom-16 inset-x-0 z-30 px-3 pb-2 pointer-events-none">
-              <div className={`max-w-2xl mx-auto pointer-events-auto rounded-2xl border px-4 py-3 shadow-xl backdrop-blur ${isDark ? "bg-slate-900/95 border-slate-800" : "bg-white/95 border-emerald-100"}`}>
-                <div className="flex items-center justify-between gap-3">
-                  {/* Step dots */}
-                  <div className="flex items-center gap-1.5">
-                    {slides.map((s, i) => {
-                      const done = passed.includes(i);
-                      const current = i === slideIdx;
-                      const Icon = s.icon;
-                      return (
-                        <button
-                          key={s.titleEn}
-                          type="button"
-                          onClick={() => jumpTo(i)}
-                          title={`${s.titleSi} (${s.titleEn})`}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-extrabold border transition-all active:scale-90 ${
-                            done
-                              ? "bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-600/30"
-                              : current
-                                ? isDark
-                                  ? "bg-slate-800 border-emerald-400 text-emerald-300 ring-2 ring-emerald-500/40"
-                                  : "bg-white border-emerald-500 text-emerald-700 ring-2 ring-emerald-500/30"
-                                : isDark
-                                  ? "bg-slate-800/60 border-slate-700 text-slate-500"
-                                  : "bg-white/70 border-emerald-100 text-slate-400"
-                          }`}
-                        >
-                          {done ? <Check className="w-4 h-4" /> : <Icon className="w-3.5 h-3.5" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Counts */}
-                  <div className="text-right shrink-0">
-                    <p className={`text-[11px] font-extrabold ${isDark ? "text-white" : "text-emerald-900"}`}>
-                      පියවර {slideIdx + 1} / {totalSlides}
-                    </p>
-                    <p className="text-[10px] font-bold flex items-center justify-end gap-2">
-                      <span className="inline-flex items-center gap-1 text-emerald-500">
-                        <CheckCircle2 className="w-3 h-3" />
-                        {passedCount}
-                      </span>
-                      <span className={`inline-flex items-center gap-1 ${isDark ? "text-amber-300" : "text-amber-600"}`}>
-                        <Pencil className="w-3 h-3" />
-                        {remainingCount}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Progress bar */}
-                <div className={`mt-2 h-1.5 rounded-full overflow-hidden ${isDark ? "bg-slate-800" : "bg-emerald-100/80"}`}>
-                  <div
-                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
-                    style={{ width: `${Math.round((passedCount / totalSlides) * 100)}%` }}
-                  />
-                </div>
-                <p className={`mt-1 text-[10px] font-semibold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                  සම්පූර කළ පියවර {passedCount} ක් • තව පියවර {remainingCount} ක් පිරවිය යුතුය
-                </p>
-              </div>
-            </div>
-          )}
         </>
         )}
       </div>
 
-      {/* Compact floating logout bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 px-4 pb-3 pt-1.5 pointer-events-none">
-        <div className="max-w-md mx-auto pointer-events-auto">
-          <button
-            onClick={onLogout}
-            className="relative w-full group flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-full bg-gradient-to-r from-red-600 via-red-500 to-rose-500 hover:from-red-500 hover:via-rose-500 hover:to-red-600 text-white text-xs font-extrabold shadow-xl shadow-red-600/40 active:scale-[0.97] transition-all"
-          >
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/25 ring-1 ring-white/40">
-              <LogOut className="w-3 h-3 text-white" />
-            </span>
-            <span className="tracking-wide">නික්මීම • Logout</span>
-          </button>
+      {/* ---------- Unified bottom app bar: progress + steps + logout ---------- */}
+      <div className="fixed bottom-0 inset-x-0 z-40 pointer-events-none">
+        <div className={`pointer-events-auto border-t backdrop-blur-xl ${isDark ? "bg-slate-950/85 border-slate-800/80" : "bg-white/85 border-emerald-100"}`}>
+          {/* hairline progress along the top edge */}
+          <div className={`h-0.5 ${isDark ? "bg-slate-800/80" : "bg-emerald-100"}`}>
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+              style={{
+                width:
+                  formType === "inactive" && !showLogs
+                    ? `${Math.round((passedCount / totalSlides) * 100)}%`
+                    : "100%",
+              }}
+            />
+          </div>
+
+          <div className="mx-auto max-w-2xl px-3 pt-2 pb-[calc(0.6rem+env(safe-area-inset-bottom))] flex items-center gap-2.5">
+            {formType === "inactive" && !showLogs ? (
+              <>
+                {/* step dots */}
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  {slides.map((s, i) => {
+                    const done = passed.includes(i);
+                    const current = i === slideIdx;
+                    const Icon = s.icon;
+                    return (
+                      <button
+                        key={s.titleEn}
+                        type="button"
+                        onClick={() => jumpTo(i)}
+                        title={`${s.titleSi} (${s.titleEn})`}
+                        className={`w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-full flex items-center justify-center border transition-all active:scale-90 ${
+                          done
+                            ? "bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-600/30"
+                            : current
+                              ? isDark
+                                ? "bg-slate-800 border-emerald-400 text-emerald-300 ring-2 ring-emerald-500/40"
+                                : "bg-white border-emerald-500 text-emerald-700 ring-2 ring-emerald-500/30"
+                              : isDark
+                                ? "bg-slate-800/60 border-slate-700 text-slate-500"
+                                : "bg-white/70 border-emerald-100 text-slate-400"
+                        }`}
+                      >
+                        {done ? <Check className="w-3.5 h-3.5" /> : <Icon className="w-3 h-3" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* compact counts */}
+                <div className="shrink-0 text-right leading-tight">
+                  <p className={`text-[11px] font-black ${isDark ? "text-white" : "text-emerald-900"}`}>
+                    {slideIdx + 1}/{totalSlides}
+                  </p>
+                  <p className="text-[9px] font-bold flex items-center justify-end gap-1.5">
+                    <span className="inline-flex items-center gap-0.5 text-emerald-500">
+                      <CheckCircle2 className="w-2.5 h-2.5" />
+                      {passedCount}
+                    </span>
+                    <span className={`inline-flex items-center gap-0.5 ${isDark ? "text-amber-300" : "text-amber-600"}`}>
+                      <Pencil className="w-2.5 h-2.5" />
+                      {remainingCount}
+                    </span>
+                  </p>
+                </div>
+              </>
+            ) : (
+              <p className={`flex-1 min-w-0 truncate text-[11px] font-extrabold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                KDU GROUP • {formType === "extension" ? "Extension Visit" : "Field Logs"}
+              </p>
+            )}
+
+            {/* compact red logout */}
+            <button
+              onClick={onLogout}
+              title="නික්මීම (Logout)"
+              className="shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white text-[11px] font-extrabold shadow-lg shadow-red-600/40 active:scale-95 transition-all"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>
+                නික්මීම<span className="hidden sm:inline"> • Logout</span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 

@@ -31,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL(base),
+    manifest: "/manifest.webmanifest",
     title: "KDU GROUP - Field Extension Officer & Admin Portal",
     applicationName: "KDU GROUP",
     authors: [{ name: "KDU GROUP" }],
@@ -80,6 +81,15 @@ export async function generateMetadata(): Promise<Metadata> {
       capable: true,
       statusBarStyle: "black-translucent",
       title: "KDU GROUP",
+    },
+
+    /* iOS Safari only honours the apple-prefixed meta for standalone
+       "Add to Home Screen" launches — Next emits mobile-web-app-capable
+       alone, which iOS ignores. */
+    other: {
+      "apple-mobile-web-app-capable": "yes",
+      "apple-mobile-web-app-status-bar-style": "black-translucent",
+      "apple-touch-fullscreen": "yes",
     },
   };
 }
