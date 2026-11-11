@@ -593,7 +593,7 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto px-3 sm:px-5 pt-4 pb-28 space-y-4">
+      <div className="max-w-2xl mx-auto px-3 sm:px-5 pt-4 pb-40 space-y-4">
         {/* Meta chips */}
         <div className="flex flex-wrap items-center gap-2">
           <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border ${isDark ? "bg-slate-900 border-slate-800 text-slate-300" : "bg-white border-emerald-100 text-emerald-800 shadow-sm"}`}>
@@ -1085,11 +1085,11 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
             />
           </div>
 
-          <div className="mx-auto max-w-2xl px-3 pt-2 pb-[calc(0.6rem+env(safe-area-inset-bottom))] flex items-center gap-2.5">
+          <div className="mx-auto max-w-2xl px-4 pt-3 pb-[calc(0.8rem+env(safe-area-inset-bottom))]">
             {formType === "inactive" && !showLogs ? (
-              <>
-                {/* step dots */}
-                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <div className="space-y-3">
+                {/* Row 1 — step dots, centred with breathing room */}
+                <div className="flex items-center justify-center gap-2.5">
                   {slides.map((s, i) => {
                     const done = passed.includes(i);
                     const current = i === slideIdx;
@@ -1100,7 +1100,7 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
                         type="button"
                         onClick={() => jumpTo(i)}
                         title={`${s.titleSi} (${s.titleEn})`}
-                        className={`w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-full flex items-center justify-center border transition-all active:scale-90 ${
+                        className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center border transition-all active:scale-90 ${
                           done
                             ? "bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-600/30"
                             : current
@@ -1112,46 +1112,57 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
                                 : "bg-white/70 border-emerald-100 text-slate-400"
                         }`}
                       >
-                        {done ? <Check className="w-3.5 h-3.5" /> : <Icon className="w-3 h-3" />}
+                        {done ? <Check className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
                       </button>
                     );
                   })}
                 </div>
 
-                {/* compact counts */}
-                <div className="shrink-0 text-right leading-tight">
-                  <p className={`text-[11px] font-black ${isDark ? "text-white" : "text-emerald-900"}`}>
-                    {slideIdx + 1}/{totalSlides}
-                  </p>
-                  <p className="text-[9px] font-bold flex items-center justify-end gap-1.5">
-                    <span className="inline-flex items-center gap-0.5 text-emerald-500">
-                      <CheckCircle2 className="w-2.5 h-2.5" />
-                      {passedCount}
+                {/* Row 2 — status chips left, logout right, clearly separated */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                    <span className={`px-3 py-1.5 rounded-full text-[11px] font-black border ${isDark ? "bg-slate-800/80 border-slate-700 text-white" : "bg-white border-emerald-200 text-emerald-900"}`}>
+                      පියවර {slideIdx + 1}/{totalSlides}
                     </span>
-                    <span className={`inline-flex items-center gap-0.5 ${isDark ? "text-amber-300" : "text-amber-600"}`}>
-                      <Pencil className="w-2.5 h-2.5" />
-                      {remainingCount}
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <CheckCircle2 className="w-3 h-3" />
+                      {passedCount} සම්පූරයි
                     </span>
-                  </p>
-                </div>
-              </>
-            ) : (
-              <p className={`flex-1 min-w-0 truncate text-[11px] font-extrabold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                KDU GROUP • {formType === "extension" ? "Extension Visit" : "Field Logs"}
-              </p>
-            )}
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                      <Pencil className="w-3 h-3" />
+                      {remainingCount} ඉතිරි
+                    </span>
+                  </div>
 
-            {/* compact red logout */}
-            <button
-              onClick={onLogout}
-              title="නික්මීම (Logout)"
-              className="shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white text-[11px] font-extrabold shadow-lg shadow-red-600/40 active:scale-95 transition-all"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>
-                නික්මීම<span className="hidden sm:inline"> • Logout</span>
-              </span>
-            </button>
+                  <button
+                    onClick={onLogout}
+                    title="නික්මීම (Logout)"
+                    className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white text-[11px] font-extrabold shadow-lg shadow-red-600/40 active:scale-95 transition-all"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>
+                      නික්මීම<span className="hidden sm:inline"> • Logout</span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <p className={`flex-1 min-w-0 truncate text-[11px] font-extrabold ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  KDU GROUP • {formType === "extension" ? "Extension Visit" : "Field Logs"}
+                </p>
+                <button
+                  onClick={onLogout}
+                  title="නික්මීම (Logout)"
+                  className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white text-[11px] font-extrabold shadow-lg shadow-red-600/40 active:scale-95 transition-all"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>
+                    නික්මීම<span className="hidden sm:inline"> • Logout</span>
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
