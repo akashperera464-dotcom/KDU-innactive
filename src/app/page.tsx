@@ -427,6 +427,32 @@ export default function Home() {
     }
   };
 
+  /* Bulk delete: whole directory, or only one import batch (password gated) */
+  const handleBulkDeleteSuppliers = async (
+    password: string,
+    importedDate?: string | null
+  ): Promise<{ deleted: number; scope: string }> => {
+    try {
+      const res = await fetch("/api/suppliers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "bulk-delete", password, importedDate }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.message || "මකා දැමීම අසාර්ථකයි (Delete failed)");
+        return { deleted: 0, scope: importedDate || "all" };
+      }
+      setSuppliers((prev) =>
+        data.scope === "all" ? [] : prev.filter((s) => s.importedDate !== data.scope)
+      );
+      return { deleted: data.deleted || 0, scope: data.scope };
+    } catch {
+      alert("සම්බන්ධතා දෝෂයකි (Connection error)");
+      return { deleted: 0, scope: importedDate || "all" };
+    }
+  };
+
   /* Partial update (reminder resolve / mark active) */
   const handleUpdateSupplier = async (id: string, patch: Partial<Supplier>) => {
     setSuppliers((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
@@ -583,6 +609,7 @@ export default function Home() {
               onBulkAddSuppliers={handleBulkAddSuppliers}
               onUpdateSupplier={handleUpdateSupplier}
               onDeleteSupplier={handleDeleteSupplier}
+              onBulkDeleteSuppliers={handleBulkDeleteSuppliers}
               onAddRoute={handleAddRoute}
               onDeleteRoute={handleDeleteRoute}
               onAddReason={handleAddReason}

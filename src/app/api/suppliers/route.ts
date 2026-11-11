@@ -61,12 +61,33 @@ export async function POST(req: Request) {
     const body = await req.json();
     const db = await getMongo();
 
+    /* ---------------- DELETE-ALL / DELETE-BY-DATE (password gated) ---------------- */
+    if (body.action === "bulk-delete") {
+      if (String(body.password || "") !== "0001") {
+        return NextResponse.json(
+          { success: false, message: "වැරදි මුරපදය (Incorrect password)" },
+          { status: 403 }
+        );
+      }
+
+      const date = body.importedDate ? String(body.importedDate).trim() : null;
+      const query = date ? { importedDate: date } : {};
+      const res = await db.collection("suppliers").deleteMany(query);
+
+      return NextResponse.json({
+        success: true,
+        deleted: res.deletedCount || 0,
+        scope: date || "all",
+      });
+    }
+
     /* ---------------- BULK IMPORT (Excel / CSV extracted rows) ---------------- */
     if (Array.isArray(body.items)) {
       let imported = 0;
       let skipped = 0;
       const defaultStatus = body.defaultStatus === "inactive" ? "inactive" : "active";
       const today = new Date().toISOString().split("T")[0];
+      const importedDate = String(body.importedDate || today).trim();
 
       for (const raw of body.items) {
         const supplierNo = String(raw.supplierNo || "").trim();
@@ -88,6 +109,7 @@ export async function POST(req: Request) {
           address: raw.address ? String(raw.address).trim() : null,
           remarks: raw.remarks ? String(raw.remarks).trim() : null,
           lastWeightKg: raw.lastWeightKg ? String(raw.lastWeightKg) : "0",
+          importedDate,
           status: raw.status
             ? String(raw.status)
             : reason === "garden_pruned"
@@ -109,7 +131,7 @@ export async function POST(req: Request) {
         } else {
           await db
             .collection("suppliers")
-            .insertOne({ id: raw.id || newId("sup"), ...record, resolvedAt: null, createdAt: new Date() } as any);
+            .insertOne({ id: raw.id || newId("sup"), ...record, resolvedAt: null, importedDate, createdAt: new Date() } as any);
         }
         imported++;
       }

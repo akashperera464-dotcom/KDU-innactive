@@ -69,6 +69,7 @@ export const suppliers = pgTable("suppliers", {
   // When an admin resolved/inspected a reminder
   resolvedAt: text("resolved_at"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  importedDate: text("imported_date"),
 });
 
 export const routes = pgTable("routes", {

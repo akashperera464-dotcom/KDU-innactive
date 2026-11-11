@@ -41,6 +41,7 @@ interface AdminDashboardProps {
   onBulkAddSuppliers: (items: Partial<Supplier>[], defaultStatus: string) => Promise<{ imported: number; skipped: number }>;
   onUpdateSupplier: (id: string, patch: Partial<Supplier>) => Promise<void>;
   onDeleteSupplier: (id: string) => Promise<void>;
+  onBulkDeleteSuppliers: (password: string, importedDate?: string | null) => Promise<{ deleted: number; scope: string }>;
   onAddRoute: (route: Partial<RouteItem>) => Promise<void>;
   onDeleteRoute: (id: string) => Promise<void>;
   onAddReason: (reason: Partial<StatusReasonItem>) => Promise<void>;
@@ -67,6 +68,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onBulkAddSuppliers,
   onUpdateSupplier,
   onDeleteSupplier,
+  onBulkDeleteSuppliers,
   onAddRoute,
   onDeleteRoute,
   onAddReason,
@@ -166,6 +168,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           onBulkAddSuppliers={onBulkAddSuppliers}
           onUpdateSupplier={onUpdateSupplier}
           onDeleteSupplier={onDeleteSupplier}
+          onBulkDeleteSuppliers={onBulkDeleteSuppliers}
           theme={theme}
         />
       )}

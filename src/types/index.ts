@@ -65,6 +65,7 @@ export interface Supplier {
   resolvedAt?: string | null; // YYYY-MM-DD reminder resolved
   address?: string | null; // office Excel "Address" column
   remarks?: string | null; // office Excel remarks column (col L)
+  importedDate?: string | null; // YYYY-MM-DD batch marker for the Excel import
 }
 
 export interface RouteItem {

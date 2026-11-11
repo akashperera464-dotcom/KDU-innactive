@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import * as XLSX from "xlsx";
 import {
   Building2,
@@ -16,6 +16,9 @@ import {
   ClipboardPaste,
   CheckCircle2,
   AlertCircle,
+  CalendarDays,
+  ShieldAlert,
+  KeyRound,
 } from "lucide-react";
 import { Supplier, RouteItem, StatusReasonItem } from "@/types";
 import { parseWorkbook, mapOfficeStatus } from "@/lib/officeImport";
@@ -44,6 +47,7 @@ interface SupplierDirectoryTabProps {
   onBulkAddSuppliers: (items: Partial<Supplier>[], defaultStatus: string) => Promise<{ imported: number; skipped: number }>;
   onUpdateSupplier: (id: string, patch: Partial<Supplier>) => Promise<void>;
   onDeleteSupplier: (id: string) => Promise<void>;
+  onBulkDeleteSuppliers: (password: string, importedDate?: string | null) => Promise<{ deleted: number; scope: string }>;
   theme: "dark" | "light";
 }
 
@@ -55,10 +59,16 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
   onBulkAddSuppliers,
   onUpdateSupplier,
   onDeleteSupplier,
+  onBulkDeleteSuppliers,
   theme,
 }) => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "inactive" | "active">("all");
+  // which Excel-import batch (importedDate) is being viewed / deleted
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [showDateDelete, setShowDateDelete] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -91,6 +101,8 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
   const isDark = theme === "dark";
 
   const filteredSuppliers = suppliers.filter((s) => {
+    // import-batch (date) filter
+    if (dateFilter !== "all" && (s.importedDate || "none") !== dateFilter) return false;
     if (statusFilter !== "all" && (s.status || "active") !== statusFilter) return false;
     const q = search.toLowerCase().trim();
     if (!q) return true;
@@ -107,6 +119,23 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
   });
 
   const inactiveCount = suppliers.filter((s) => (s.status || "active") === "inactive").length;
+
+  /* distinct import batches (importedDate) with counts, newest first */
+  const importBatches = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of suppliers) {
+      const d = s.importedDate || "none";
+      map.set(d, (map.get(d) || 0) + 1);
+    }
+    return Array.from(map.entries())
+      .filter(([d]) => d !== "none")
+      .sort((a, b) => (a[0] < b[0] ? 1 : -1));
+  }, [suppliers]);
+
+  const currentBatchCount =
+    dateFilter === "all"
+      ? suppliers.length
+      : suppliers.filter((s) => s.importedDate === dateFilter).length;
 
   /* friendly reason labels (office words were mapped to reason ids on import) */
   const reasonLabel = (id?: string | null): { main: string; sub: string | null } => {
@@ -355,6 +384,76 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
         </div>
       </div>
 
+      {/* Import-date filter + batch delete */}
+      {importBatches.length > 0 && (
+        <div className={`rounded-3xl border p-4 space-y-3 ${isDark ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-200 shadow-sm"}`}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h4 className={`text-sm font-extrabold flex items-center gap-1.5 ${isDark ? "text-white" : "text-slate-900"}`}>
+                <CalendarDays className="w-4 h-4 text-emerald-400" />
+                <span>ආයාත දින අනුව බලන්න (Filter by import date)</span>
+              </h4>
+              <p className={`text-[11px] mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                Excel ආයාත වූ දිනය අනුව ලැයිස්තුව පෙරහන් කරන්න, හෝ එක් දිනයක ආයාතයක් සම්පූර්ණයෙන් මකන්න.
+              </p>
+            </div>
+
+            {/* delete controls */}
+            <div className="flex flex-wrap items-center gap-2">
+              {dateFilter !== "all" && (
+                <button
+                  onClick={() => setShowDateDelete(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-extrabold text-red-400 bg-red-500/10 border border-red-500/40 hover:bg-red-500/20 active:scale-95 transition-all"
+                  title={`Delete all ${currentBatchCount} suppliers imported on ${dateFilter}`}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>මෙම දිනය මකන්න ({currentBatchCount})</span>
+                </button>
+              )}
+              <button
+                onClick={() => setShowDateDelete(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-extrabold text-white bg-red-600 hover:bg-red-500 border border-red-500/40 shadow-md shadow-red-600/30 active:scale-95 transition-all"
+                title="Delete every supplier in the directory"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>සියල්ල මකන්න ({suppliers.length})</span>
+              </button>
+            </div>
+          </div>
+
+          {/* date chips */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setDateFilter("all")}
+              className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold border transition-all ${
+                dateFilter === "all"
+                  ? "bg-emerald-600 text-white border-emerald-600 shadow"
+                  : isDark
+                    ? "bg-slate-800 border-slate-700 text-slate-300 hover:border-emerald-500/40"
+                    : "bg-white border-slate-200 text-slate-600 hover:border-emerald-400"
+              }`}
+            >
+              සියල්ල (All) • {suppliers.length}
+            </button>
+            {importBatches.map(([date, count]) => (
+              <button
+                key={date}
+                onClick={() => setDateFilter(date)}
+                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold border transition-all ${
+                  dateFilter === date
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow"
+                    : isDark
+                      ? "bg-slate-800 border-slate-700 text-slate-300 hover:border-emerald-500/40"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-emerald-400"
+                }`}
+              >
+                📅 {date} • {count}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className={`rounded-3xl border overflow-hidden ${isDark ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-200 shadow-md"}`}>
         <div className="overflow-x-auto">
@@ -455,6 +554,73 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
           </table>
         </div>
       </div>
+
+      {/* ================= BULK DELETE PASSWORD MODAL ================= */}
+      {showDateDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className={`relative w-full max-w-sm rounded-3xl p-6 shadow-2xl border ${isDark ? "bg-slate-900 border-red-500/40 text-white" : "bg-white border-red-200 text-slate-900"}`}>
+            <div className="flex items-center gap-2 pb-3 mb-4 border-b border-red-500/20">
+              <div className="p-2 rounded-xl bg-red-500/15 text-red-400">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-extrabold text-sm leading-tight">
+                  {dateFilter === "all" ? "සියලුම සැපයුම්කරුවන් මකන්න" : "ආයාත කළ දිනයේ සැපයුම්කරුවන් මකන්න"}
+                </h3>
+                <p className={`text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  {dateFilter === "all"
+                    ? `මුළු ලැයිස්තුවම (${suppliers.length}) ස්ථිරව මකා දමනු ලැබේ.`
+                    : `${dateFilter} දිනට ආයාත කළ ${currentBatchCount} ක් ස්ථිරව මකා දමනු ලැබේ.`}
+                </p>
+              </div>
+            </div>
+
+            <label className={`block text-xs font-extrabold mb-1.5 ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+              පරිපාලක මුරපදය (Admin password) *
+            </label>
+            <div className="relative">
+              <KeyRound className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                placeholder="••••"
+                autoFocus
+                className={`w-full pl-10 pr-3 py-2.5 rounded-xl text-sm tracking-widest ${isDark ? "bg-slate-800 border border-slate-700 text-white" : "bg-slate-50 border border-slate-300 text-slate-900"}`}
+              />
+            </div>
+
+            <div className="flex gap-2 mt-5">
+              <button
+                onClick={() => {
+                  setShowDateDelete(false);
+                  setDeletePassword("");
+                }}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold ${isDark ? "bg-slate-800 hover:bg-slate-700 text-slate-300" : "bg-slate-100 hover:bg-slate-200 text-slate-700"}`}
+              >
+                අවලංගු (Cancel)
+              </button>
+              <button
+                disabled={bulkDeleting || !deletePassword.trim()}
+                onClick={async () => {
+                  setBulkDeleting(true);
+                  const res = await onBulkDeleteSuppliers(deletePassword, dateFilter === "all" ? null : dateFilter);
+                  setBulkDeleting(false);
+                  setShowDateDelete(false);
+                  setDeletePassword("");
+                  if (res.deleted > 0) {
+                    alert(`✅ මකා දමන ලදී: ${res.deleted} ක් (Deleted ${res.deleted} suppliers)`);
+                  }
+                }}
+                className="flex-1 py-2.5 rounded-xl text-xs font-extrabold text-white bg-red-600 hover:bg-red-500 shadow-lg shadow-red-600/30 disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                {bulkDeleting ? "මකමින්..." : "මකන්න (Delete)"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ================= IMPORT MODAL ================= */}
       {showImport && (
