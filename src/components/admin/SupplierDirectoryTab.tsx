@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
-import { Supplier, RouteItem } from "@/types";
+import { Supplier, RouteItem, StatusReasonItem } from "@/types";
 import { parseWorkbook, mapOfficeStatus } from "@/lib/officeImport";
 import { FACTORY_ROUTES } from "@/db/factoryRoutes";
 
@@ -39,6 +39,7 @@ const factoryOfRoute = (route?: string | null): string | null => {
 interface SupplierDirectoryTabProps {
   suppliers: Supplier[];
   routes: RouteItem[];
+  reasons: StatusReasonItem[];
   onAddSupplier: (supplier: Partial<Supplier>) => Promise<void>;
   onBulkAddSuppliers: (items: Partial<Supplier>[], defaultStatus: string) => Promise<{ imported: number; skipped: number }>;
   onUpdateSupplier: (id: string, patch: Partial<Supplier>) => Promise<void>;
@@ -49,6 +50,7 @@ interface SupplierDirectoryTabProps {
 export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
   suppliers,
   routes,
+  reasons,
   onAddSupplier,
   onBulkAddSuppliers,
   onUpdateSupplier,
@@ -97,11 +99,27 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
       s.name.toLowerCase().includes(q) ||
       (s.phone && s.phone.toLowerCase().includes(q)) ||
       (s.nic && s.nic.toLowerCase().includes(q)) ||
-      (s.route && s.route.toLowerCase().includes(q))
+      (s.route && s.route.toLowerCase().includes(q)) ||
+      (s.factory && s.factory.toLowerCase().includes(q)) ||
+      (s.address && s.address.toLowerCase().includes(q)) ||
+      (s.remarks && s.remarks.toLowerCase().includes(q))
     );
   });
 
   const inactiveCount = suppliers.filter((s) => (s.status || "active") === "inactive").length;
+
+  /* friendly reason labels (office words were mapped to reason ids on import) */
+  const reasonLabel = (id?: string | null): { main: string; sub: string | null } => {
+    if (!id) return { main: "—", sub: null };
+    const r = reasons.find((x) => x.id === id);
+    if (!r) return { main: id, sub: null };
+    return r.labelSi === r.labelEn
+      ? { main: r.labelEn, sub: null }
+      : { main: r.labelSi, sub: r.labelEn };
+  };
+
+  const factoryShort = (f?: string | null) =>
+    !f ? "—" : f.replace(" Tea Factory", "").replace(" Leaf Center", " LC");
 
   /* ---------- Office Excel / CSV extraction ---------- */
   const applyParse = (res: ReturnType<typeof parseWorkbook>, label: string) => {
@@ -346,8 +364,12 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
                 <th className="px-4 py-3.5 font-bold">අංකය (No)</th>
                 <th className="px-4 py-3.5 font-bold">නම (Name)</th>
                 <th className="px-4 py-3.5 font-bold">දුරකථන (Phone)</th>
+                <th className="px-4 py-3.5 font-bold">ලිපිනය (Address)</th>
+                <th className="px-4 py-3.5 font-bold">කර්මාන්ත ශාලාව (Factory)</th>
                 <th className="px-4 py-3.5 font-bold">මාර්ගය (Route)</th>
                 <th className="px-4 py-3.5 font-bold">තත්ත්වය (Status)</th>
+                <th className="px-4 py-3.5 font-bold">හේතුව (Reason)</th>
+                <th className="px-4 py-3.5 font-bold">සටහන් (Remarks)</th>
                 <th className="px-4 py-3.5 font-bold">අවසන් බර (Kg)</th>
                 <th className="px-4 py-3.5 font-bold text-right">ක්‍රියාමාර්ග</th>
               </tr>
@@ -355,21 +377,22 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
             <tbody className="divide-y divide-emerald-500/10">
               {filteredSuppliers.map((s) => {
                 const st = (s.status || "active") as string;
+                const rl = reasonLabel(s.previousReason);
                 return (
                   <tr key={s.id} className={`hover:bg-emerald-500/5 transition-colors ${isDark ? "text-slate-200" : "text-slate-800"}`}>
                     <td className="px-4 py-3 font-mono font-bold text-emerald-400">#{s.supplierNo}</td>
-                    <td className="px-4 py-3 font-semibold">
-                      <span title={s.address || undefined}>{s.name}</span>
-                      <span className={`block text-[10px] font-normal ${isDark ? "text-slate-500" : "text-slate-400"}`}>
-                        {s.previousReason || "—"}
+                    <td className="px-4 py-3 font-semibold">{s.name}</td>
+                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{s.phone || "-"}</td>
+                    <td className="px-4 py-3 max-w-[240px]">
+                      <span className={`block truncate text-[11px] ${isDark ? "text-slate-400" : "text-slate-500"}`} title={s.address || undefined}>
+                        {s.address || "-"}
                       </span>
-                      {s.remarks && (
-                        <span className="block text-[10px] font-bold text-amber-400 truncate max-w-[220px]" title={s.remarks}>
-                          ✎ {s.remarks}
-                        </span>
-                      )}
                     </td>
-                    <td className="px-4 py-3 text-slate-400">{s.phone || "-"}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className={`text-[11px] font-bold ${isDark ? "text-teal-300" : "text-teal-700"}`}>
+                        {factoryShort(s.factory)}
+                      </span>
+                    </td>
                     <td className="px-4 py-3">
                       <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 text-[11px]">{s.route || "-"}</span>
                     </td>
@@ -389,7 +412,26 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-mono font-bold text-teal-400">{s.lastWeightKg || "0"} Kg</td>
+                    <td className="px-4 py-3 max-w-[200px]">
+                      <span className="block truncate text-[11px] font-semibold" title={rl.sub || undefined}>
+                        {rl.main}
+                      </span>
+                      {rl.sub && (
+                        <span className={`block truncate text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                          {rl.sub}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 max-w-[220px]">
+                      {s.remarks ? (
+                        <span className="block truncate text-[11px] font-bold text-amber-400" title={s.remarks}>
+                          ✎ {s.remarks}
+                        </span>
+                      ) : (
+                        <span className="text-slate-500 text-[11px]">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 font-mono font-bold text-teal-400 whitespace-nowrap">{s.lastWeightKg || "0"} Kg</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => openEdit(s)} className="p-1.5 rounded-lg text-emerald-400 hover:bg-emerald-500/20 transition-all" title="Edit">

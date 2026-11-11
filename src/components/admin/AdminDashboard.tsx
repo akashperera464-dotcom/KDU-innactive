@@ -161,6 +161,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <SupplierDirectoryTab
           suppliers={suppliers}
           routes={routes}
+          reasons={reasons}
           onAddSupplier={onAddSupplier}
           onBulkAddSuppliers={onBulkAddSuppliers}
           onUpdateSupplier={onUpdateSupplier}
