@@ -10,7 +10,6 @@ import {
   Phone, 
   Trash2, 
   ExternalLink, 
-  Sprout, 
   Users, 
   FileText, 
   CheckCircle2, 
@@ -65,7 +64,7 @@ export const EntryDetailsModal: React.FC<EntryDetailsModalProps> = ({
                 )}
               </div>
               <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                {entry.type === "inactive" ? "Inactive Supplier Form" : "Extension Visit / RA Form"}
+                {entry.type === "inactive" ? "Inactive Supplier Form" : "Extension Visit Form"}
               </p>
             </div>
           </div>
@@ -240,60 +239,6 @@ export const EntryDetailsModal: React.FC<EntryDetailsModalProps> = ({
             </div>
           )}
 
-          {/* Rainforest Alliance 6-Point Audit Checklist (If extension form) */}
-          {entry.type === "extension" && (
-            <div className={`p-4 rounded-2xl border space-y-3 ${
-              isDark ? "bg-slate-800/50 border-slate-700" : "bg-white border-slate-200"
-            }`}>
-              <h4 className="font-bold text-emerald-400 flex items-center gap-1.5">
-                <Sprout className="w-4 h-4" />
-                <span>Rainforest Alliance (RA) තිරසාර පරීක්ෂාව (6-Point Checklist)</span>
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                <div className="p-2 rounded-xl bg-slate-800/40 flex justify-between items-center">
-                  <span>1. කැලෑ නොකැපීම (No Deforestation) [6.1.1]:</span>
-                  <span className={`font-bold px-2 py-0.5 rounded ${entry.raNoDeforestation === "නැත (No)" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"}`}>
-                    {entry.raNoDeforestation || "නැත (No)"}
-                  </span>
-                </div>
-
-                <div className="p-2 rounded-xl bg-slate-800/40 flex justify-between items-center">
-                  <span>2. ඇළ, දොළ ආරක්ෂාව (Riparian Buffer) [6.3.1]:</span>
-                  <span className={`font-bold px-2 py-0.5 rounded ${entry.raRiparianBuffer === "ඔව් (Yes)" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
-                    {entry.raRiparianBuffer || "ඔව් (Yes)"}
-                  </span>
-                </div>
-
-                <div className="p-2 rounded-xl bg-slate-800/40 flex justify-between items-center">
-                  <span>3. අපද්‍රව්‍ය ගිනි නොතැබීම (No Waste Burning) [6.7.2]:</span>
-                  <span className={`font-bold px-2 py-0.5 rounded ${entry.raNoWasteBurning === "නැත (No)" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"}`}>
-                    {entry.raNoWasteBurning || "නැත (No)"}
-                  </span>
-                </div>
-
-                <div className="p-2 rounded-xl bg-slate-800/40 flex justify-between items-center">
-                  <span>4. වැසි ජලය එකතු කිරීම (Rainwater) [6.5.5]:</span>
-                  <span className={`font-bold px-2 py-0.5 rounded ${entry.raRainwaterHarvesting === "ඔව් (Yes)" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-700 text-slate-300"}`}>
-                    {entry.raRainwaterHarvesting || "ඔව් (Yes)"}
-                  </span>
-                </div>
-
-                <div className="p-2 rounded-xl bg-slate-800/40 flex justify-between items-center">
-                  <span>5. පස සේදියාම පාලනය (Soil Erosion) [6.4.5]:</span>
-                  <span className={`font-bold px-2 py-0.5 rounded ${entry.raSoilErosion === "ඔව් (Yes)" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
-                    {entry.raSoilErosion || "ඔව් (Yes)"}
-                  </span>
-                </div>
-
-                <div className="p-2 rounded-xl bg-slate-800/40 flex justify-between items-center">
-                  <span>6. වනසතුන් ආරක්ෂා කිරීම (Wildlife) [6.4.1]:</span>
-                  <span className={`font-bold px-2 py-0.5 rounded ${entry.raWildlifeProtection === "ඔව් (Yes)" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"}`}>
-                    {entry.raWildlifeProtection || "ඔව් (Yes)"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Dynamic Fields (If any) */}
           {Object.keys(dynamicParsed).length > 0 && (

@@ -160,13 +160,8 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
   const [routeProblems, setRouteProblems] = useState("");
   const [comments, setComments] = useState("");
 
-  // RA checklist
-  const [raNoDeforestation, setRaNoDeforestation] = useState("නැත (No)");
-  const [raRiparianBuffer, setRaRiparianBuffer] = useState("ඔව් (Yes)");
-  const [raNoWasteBurning, setRaNoWasteBurning] = useState("නැත (No)");
-  const [raRainwaterHarvesting, setRaRainwaterHarvesting] = useState("ඔව් (Yes)");
-  const [raSoilErosion, setRaSoilErosion] = useState("ඔව් (Yes)");
-  const [raWildlifeProtection, setRaWildlifeProtection] = useState("ඔව් (Yes)");
+  // (RA checklist removed)
+
 
   const [dynamicAnswers, setDynamicAnswers] = useState<Record<string, string>>({});
 
@@ -374,12 +369,7 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
       suggestions: formType === "extension" ? suggestions.trim() || undefined : undefined,
       routeProblems: formType === "extension" ? routeProblems.trim() || undefined : undefined,
       comments: formType === "extension" ? comments.trim() || undefined : undefined,
-      raNoDeforestation: formType === "extension" ? raNoDeforestation : undefined,
-      raRiparianBuffer: formType === "extension" ? raRiparianBuffer : undefined,
-      raNoWasteBurning: formType === "extension" ? raNoWasteBurning : undefined,
-      raRainwaterHarvesting: formType === "extension" ? raRainwaterHarvesting : undefined,
-      raSoilErosion: formType === "extension" ? raSoilErosion : undefined,
-      raWildlifeProtection: formType === "extension" ? raWildlifeProtection : undefined,
+
       customFieldsJson: Object.keys(dynamicAnswers).length ? JSON.stringify(dynamicAnswers) : undefined,
     };
 
@@ -459,58 +449,6 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
     isDark ? "bg-slate-900 border-slate-800" : "bg-white border-emerald-100/80 shadow-sm"
   }`;
 
-  /* ---------- RA question card ---------- */
-  const RaCard: React.FC<{
-    index: number;
-    titleSi: string;
-    titleEn: string;
-    req: string;
-    question: string;
-    policy: string;
-    value: string;
-    onChange: (v: string) => void;
-    yesIsGood: boolean;
-  }> = ({ index, titleSi, titleEn, req, question, policy, value, onChange, yesIsGood }) => (
-    <div className={cardCls}>
-      <p className={`text-[13px] font-extrabold leading-snug ${isDark ? "text-emerald-300" : "text-emerald-700"}`}>
-        {index}. {titleSi} ({titleEn}) - <span className="font-mono text-[11px]">[Requirement {req}]</span>
-      </p>
-      <p className={`text-[13px] leading-relaxed ${isDark ? "text-slate-300" : "text-slate-700"}`}>{question}</p>
-      <p className={`text-[11px] italic leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}>{policy}</p>
-      <div className="grid grid-cols-2 gap-2 pt-1">
-        <button
-          type="button"
-          onClick={() => onChange("ඔව් (Yes)")}
-          className={`py-2.5 rounded-xl text-xs font-extrabold border transition-all active:scale-95 ${
-            value === "ඔව් (Yes)"
-              ? yesIsGood
-                ? "bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30"
-                : "bg-red-500 text-white border-red-500 shadow-md shadow-red-500/30"
-              : isDark
-                ? "bg-slate-800 border-slate-700 text-slate-300"
-                : "bg-white border-emerald-100 text-slate-600"
-          }`}
-        >
-          ඔව් (Yes)
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange("නැත (No)")}
-          className={`py-2.5 rounded-xl text-xs font-extrabold border transition-all active:scale-95 ${
-            value === "නැත (No)"
-              ? yesIsGood
-                ? "bg-red-500 text-white border-red-500 shadow-md shadow-red-500/30"
-                : "bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/30"
-              : isDark
-                ? "bg-slate-800 border-slate-700 text-slate-300"
-                : "bg-white border-emerald-100 text-slate-600"
-          }`}
-        >
-          නැත (No)
-        </button>
-      </div>
-    </div>
-  );
 
   const renderDynamic = (q: CustomQuestionItem) => (
     <div key={q.id}>
@@ -730,7 +668,7 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
                   : "text-emerald-900/60"
             }`}
           >
-            Extension Visit / RA Program
+            Extension Visit
           </button>
         </div>
 
@@ -752,7 +690,7 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
                         {en.supplierName} {en.supplierNo ? `(#${en.supplierNo})` : ""}
                       </span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${en.type === "inactive" ? "bg-amber-500/20 text-amber-600 border border-amber-500/30" : "bg-blue-500/20 text-blue-600 border border-blue-500/30"}`}>
-                        {en.type === "inactive" ? "Inactive" : "RA Visit"}
+                        {en.type === "inactive" ? "Inactive" : "Extension"}
                       </span>
                     </div>
                     <p className={`mt-1 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
@@ -1053,7 +991,7 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
                 </div>
               )}
 
-              {/* ================= EXTENSION / RA (unchanged scrolling form) ================= */}
+              {/* ================= EXTENSION VISIT form ================= */}
               {formType === "extension" && (
               <>
                 <div className={cardCls}>
@@ -1110,22 +1048,6 @@ export const CollectorPortal: React.FC<CollectorPortalProps> = ({
                     <textarea rows={2} value={comments} onChange={(e) => setComments(e.target.value)} placeholder="නිරීක්ෂණ..." className={inputCls} />
                   </div>
                 </div>
-
-                <div className={`rounded-2xl p-4 border text-center ${isDark ? "bg-slate-900 border-slate-800" : "bg-emerald-50/70 border-emerald-100"}`}>
-                  <h3 className={`text-sm font-extrabold ${isDark ? "text-emerald-300" : "text-emerald-600"}`}>
-                    rainforest alliance පිරික්සුම් ලැයිස්තුව (Environmental Checklist)
-                  </h3>
-                  <p className={`text-[11px] mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                    RA සහතිකකරණ නිර්ණායක 6ට අනුකූලදැයි පරීක්ෂා කර පිළිතුරු සටහන් කරන්න.
-                  </p>
-                </div>
-
-                <RaCard index={1} titleSi="වන විනාශය නොකිරීම" titleEn="No Deforestation" req="6.1.1" question="2014 ජනවාරි 1 දිනෙන් පසුව ස්වභාවික කැලෑ/වනාන්තර කපා එළිපෙහෙළි කර තේ වගාවට ගෙන තිබේද?" policy="RA නීතිය: 2014න් පස්සේ කැලෑ කපලා තියෙනවා නම් RA certificate එක සිරාවටම ලැබෙන්නේ නැහැ. (පිළිතුර No විය යුතුය)" value={raNoDeforestation} onChange={setRaNoDeforestation} yesIsGood={false} />
-                <RaCard index={2} titleSi="ඇළ, දොළ, ගංගා ආරක්ෂා කිරීම" titleEn="Riparian Buffer Protection" req="6.3.1 & 6.3.2" question="වත්ත ආසන්නයේ ඇති ජල මාර්ග (ඇළ/දොළ/ලිං) වටා මීටර් 5 - 10 අතර රසායනික ද්‍රව්‍ය නොගසන ආරක්ෂිත කලාපයක් (Buffer Zone) පවත්වා ගන්නේද?" policy="RA නීතිය: වගාවේ පාවිච්චි කරන පොහොර හෝ කෘමිනාශක ජල මාර්ග වලට එකතු වීම වැළැක්විය යුතුය." value={raRiparianBuffer} onChange={setRaRiparianBuffer} yesIsGood={true} />
-                <RaCard index={3} titleSi="අපද්‍රව්‍ය ගිනි තැබීම තහනම" titleEn="No Waste Burning" req="6.7.2" question="වත්ත තුළ හෝ පරිශ්‍රයේ ප්ලාස්ටික්, පොලිතීන් හෝ නොදිරන කුණු වර්ග එළිමහනේ ගිනි තබනවාද?" policy="RA නීතිය: කිසිම පරිසරයක නොදිරන ද්‍රව්‍ය ගිනි තැබීම සපිරියෙන්ම තහනම්. (පිළිතුර No විය යුතුය)" value={raNoWasteBurning} onChange={setRaNoWasteBurning} yesIsGood={false} />
-                <RaCard index={4} titleSi="වැසි ජලය එකතු කිරීම සහ භාවිතය" titleEn="Rainwater Harvesting" req="6.5.5" question="වගා කටයුතු හෝ වෙනත් අවශ්‍යතා සඳහා වැසි ජලය එකතු කර පාවිච්ි කිරීමට ක්‍රමවේදයක් තිබේද?" policy="RA නීතිය: භගත ජලය විතරක් පාවිච්ි නොකර වැසි ජලය කළමනාකරණය කිරීම ප්‍රවර්ධනය කරයි." value={raRainwaterHarvesting} onChange={setRaRainwaterHarvesting} yesIsGood={true} />
-                <RaCard index={5} titleSi="පස සේදියාම පාලනය" titleEn="Soil Erosion Control" req="6.4.5 & 4.4.4" question="බෑවුම් සහිත ස්ථාන වල පස සේදියාම වැළැක්වීමට කානු (Terracing), ආවරණ බෝග (Mulching / Cover Crops) යොදා තිබේද?" policy="RA නීතිය: පස නිසරු වීම වැළැක්වීම අනිවාර්යය." value={raSoilErosion} onChange={setRaSoilErosion} yesIsGood={true} />
-                <RaCard index={6} titleSi="වනසතුන් සහ ජෛව විවිධත්වය ආරක්ෂා කිරීම" titleEn="Wildlife Protection" req="6.4.1 & 6.4.2" question="වත්ත තුළ වනසතුන් දඩයම් කිරීම, මන්දගැසීම හෝ සතුන් සිරකර තබාගැනීම සිදු නොවන්නේද?" policy="RA නීතිය: දඩයම් කිරීම හෝ තර්ජනයට ලක්වූ සතුන් මැරීම නීතියෙන් සහ RA මගින් සම්පූර්ණයෙන්ම තහනම්." value={raWildlifeProtection} onChange={setRaWildlifeProtection} yesIsGood={true} />
 
                 <button
                   type="submit"

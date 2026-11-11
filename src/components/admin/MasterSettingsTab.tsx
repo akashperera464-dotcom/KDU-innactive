@@ -429,7 +429,7 @@ export const MasterSettingsTab: React.FC<MasterSettingsTabProps> = ({
                 >
                   <option value="both">පෝරම දෙකටම (Both Forms)</option>
                   <option value="inactive">Active / Inactive Form පමණක්</option>
-                  <option value="extension">Extension / RA Form පමණක්</option>
+                  <option value="extension">Extension Visit Form පමණක්</option>
                 </select>
               </div>
 

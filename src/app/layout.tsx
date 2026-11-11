@@ -40,7 +40,6 @@ export async function generateMetadata(): Promise<Metadata> {
       "tea factory",
       "Ceylon tea",
       "extension officer",
-      "Rainforest Alliance",
       "field data collection",
     ],
 

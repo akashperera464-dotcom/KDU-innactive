@@ -109,14 +109,14 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
     typeFilter === "inactive"
       ? "KDU_Inactive_Suppliers"
       : typeFilter === "extension"
-        ? "KDU_Extension_RA_Visits"
+        ? "KDU_Extension_Visits"
         : "KDU_All_Records";
 
   const scopeLabel =
     typeFilter === "inactive"
       ? "Inactive"
       : typeFilter === "extension"
-        ? "Extension / RA"
+        ? "Extension"
         : "All";
 
   // KPI Calculations
@@ -287,18 +287,18 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           <p className="text-[11px] text-slate-400 mt-1">අක්‍රිය / දළු පරීක්ෂණ</p>
         </div>
 
-        {/* KPI 3: Extension Visit / RA Card */}
+        {/* KPI 3: Extension Visit Card */}
         <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${
           isDark ? "bg-slate-900/90 border-blue-500/40 glow-blue" : "bg-white border-blue-300 shadow-md"
         }`}>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-blue-400">Extension Visit / RA</span>
+            <span className="text-xs font-bold text-blue-400">Extension Visit</span>
             <div className="p-1.5 rounded-xl bg-blue-500/20 text-blue-400">
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-black text-white">{extensionCount}</div>
-          <p className="text-[11px] text-slate-400 mt-1">ව්‍යාප්ති හා RA විගණන</p>
+          <p className="text-[11px] text-slate-400 mt-1">ව්‍යාප්ති නිරීක්ෂණ විගණන</p>
         </div>
 
         {/* KPI 4: Total Leaf Volume (Kg) */}
@@ -445,7 +445,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               [
                 { id: "all", label: `All (${filteredEntries.length})` },
                 { id: "inactive", label: `Inactive (${inactiveCount})` },
-                { id: "extension", label: `Ext / RA (${extensionCountFiltered})` },
+                { id: "extension", label: `Extension (${extensionCountFiltered})` },
               ] as const
             ).map((opt) => (
               <button

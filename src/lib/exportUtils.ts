@@ -36,12 +36,6 @@ export function exportToCsv(data: Entry[], filename = "KDU_Tea_Factory_Data") {
     "Suggestions",
     "Route Problems",
     "Comments",
-    "RA: No Deforestation [6.1.1]",
-    "RA: Riparian Buffer [6.3.1]",
-    "RA: No Waste Burning [6.7.2]",
-    "RA: Rainwater Harvesting [6.5.5]",
-    "RA: Soil Erosion [6.4.5]",
-    "RA: Wildlife Protection [6.4.1]",
     "GPS Location",
     "GPS Accuracy",
     "Dynamic Survey JSON"
@@ -49,7 +43,7 @@ export function exportToCsv(data: Entry[], filename = "KDU_Tea_Factory_Data") {
 
   const rows = data.map((item) => [
     item.id,
-    item.type === "inactive" ? "Inactive Supplier" : "Extension Visit / RA Program",
+    item.type === "inactive" ? "Inactive Supplier" : "Extension Visit",
     item.date,
     item.time,
     item.collectorId,
@@ -76,12 +70,6 @@ export function exportToCsv(data: Entry[], filename = "KDU_Tea_Factory_Data") {
     item.suggestions ? `"${item.suggestions.replace(/"/g, '""')}"` : "",
     item.routeProblems ? `"${item.routeProblems.replace(/"/g, '""')}"` : "",
     item.comments ? `"${item.comments.replace(/"/g, '""')}"` : "",
-    item.raNoDeforestation || "",
-    item.raRiparianBuffer || "",
-    item.raNoWasteBurning || "",
-    item.raRainwaterHarvesting || "",
-    item.raSoilErosion || "",
-    item.raWildlifeProtection || "",
     item.gpsLocation || "",
     item.gpsAccuracy || (item.gpsLocation ? "precise" : ""),
     item.customFieldsJson ? `"${item.customFieldsJson.replace(/"/g, '""')}"` : ""
@@ -107,7 +95,7 @@ export function exportToExcel(data: Entry[], filename = "KDU_Tea_Factory_Data") 
 
   const excelRows = data.map((item) => ({
     "ID": item.id,
-    "Record Type": item.type === "inactive" ? "Inactive Supplier" : "Extension Visit / RA",
+    "Record Type": item.type === "inactive" ? "Inactive Supplier" : "Extension Visit",
     "Date": item.date,
     "Time": item.time,
     "Extension Officer ID": item.collectorId,
@@ -134,12 +122,6 @@ export function exportToExcel(data: Entry[], filename = "KDU_Tea_Factory_Data") 
     "Suggestions / Feedback": item.suggestions || "",
     "Route Problems": item.routeProblems || "",
     "Field Observations": item.comments || "",
-    "RA: No Deforestation [6.1.1]": item.raNoDeforestation || "",
-    "RA: Riparian Buffer [6.3.1]": item.raRiparianBuffer || "",
-    "RA: No Waste Burning [6.7.2]": item.raNoWasteBurning || "",
-    "RA: Rainwater Harvesting [6.5.5]": item.raRainwaterHarvesting || "",
-    "RA: Soil Erosion [6.4.5]": item.raSoilErosion || "",
-    "RA: Wildlife Protection [6.4.1]": item.raWildlifeProtection || "",
     "GPS Location": item.gpsLocation || "",
     "GPS Accuracy": item.gpsAccuracy || (item.gpsLocation ? "precise" : ""),
     "Custom Survey Fields": item.customFieldsJson || "",
