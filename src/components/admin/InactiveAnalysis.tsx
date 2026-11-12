@@ -32,6 +32,9 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
 
   // expanded = the table grows to its natural height instead of scrolling inside the card
   const [expanded, setExpanded] = useState(false);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const nudgeScroll = (dir: "left" | "right") =>
+    scrollRef.current?.scrollBy({ left: dir === "left" ? -320 : 320, behavior: "smooth" });
 
   const reasonLabel = (id?: string | null) => {
     if (!id) return "—";
@@ -216,24 +219,45 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
           පරිපාලක ලැයිස්තුවේ අක්‍රිය සැපයුම්කරුවන් නොමැත. (Import the office inactive-supplier list from the Suppliers tab to unlock this analysis.)
         </p>
       ) : (
-        <div
-          className="overflow-auto rounded-2xl border"
-          style={
-            expanded
-              ? undefined
-              : { maxHeight: COLLAPSED_MAX, overscrollBehavior: "contain" as const }
-          }
-        >
+        <div className="relative">
+          {/* horizontal nudge arrows (always visible when scrollable) */}
+          <div className="absolute -left-1 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-1">
+            <button
+              onClick={() => nudgeScroll("left")}
+              title="පෙර කාණ්ඩ වෙත යන්න (Scroll left)"
+              className="w-7 h-7 rounded-full bg-white/95 border border-slate-300 text-slate-600 shadow-md flex items-center justify-center hover:bg-slate-100 active:scale-90 transition-all"
+            >
+              <ChevronUp className="w-4 h-4 rotate-[-90deg]" />
+            </button>
+          </div>
+          <div className="absolute -right-1 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-1">
+            <button
+              onClick={() => nudgeScroll("right")}
+              title="ඊළඟ කාණ්ඩ වෙත යන්න (Scroll right)"
+              className="w-7 h-7 rounded-full bg-white/95 border border-slate-300 text-slate-600 shadow-md flex items-center justify-center hover:bg-slate-100 active:scale-90 transition-all"
+            >
+              <ChevronDown className="w-4 h-4 rotate-90" />
+            </button>
+          </div>
+          <div
+            ref={scrollRef}
+            className="overflow-x-auto overflow-y-auto rounded-2xl border"
+            style={
+              expanded
+                ? undefined
+                : { maxHeight: COLLAPSED_MAX, overscrollBehavior: "contain" as const }
+            }
+          >
           {/* min-width wrapper keeps columns readable and enables horizontal scroll */}
           <div className="min-w-[1100px]">
           <table className="w-full text-left text-xs">
-            <thead className={`sticky top-0 z-10 border-b ${isDark ? "bg-slate-800/95 border-slate-700 text-slate-300 backdrop-blur" : "bg-slate-50/95 border-slate-200 text-slate-600 backdrop-blur"}`}>
+            <thead className={`border-b ${isDark ? "bg-slate-800/95 border-slate-700 text-slate-300" : "bg-slate-50/95 border-slate-200 text-slate-600"}`}>
               <tr>
-                <th className="px-3 py-2.5 font-bold whitespace-nowrap">සැපයුම්කරු (Supplier)</th>
-                <th className="px-3 py-2.5 font-bold whitespace-nowrap">මාර්ගය (Route)</th>
-                <th className="px-3 py-2.5 font-bold whitespace-nowrap">පරිපාලක හේතුව (Admin Expected)</th>
-                <th className="px-3 py-2.5 font-bold whitespace-nowrap">ක්ෂේත්‍ර දත්ත (Field Actual)</th>
-                <th className="px-3 py-2.5 font-bold whitespace-nowrap">තත්ත්වය (Verdict)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800">සැපයුම්කරු (Supplier)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800">මාර්ගය (Route)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800">පරිපාලක හේතුව (Admin Expected)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800">ක්ෂේත්‍ර දත්ත (Field Actual)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800">තත්ත්වය (Verdict)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-emerald-500/10">
@@ -288,6 +312,7 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
             </tbody>
           </table>
           </div>
+        </div>
         </div>
       )}
     </div>
