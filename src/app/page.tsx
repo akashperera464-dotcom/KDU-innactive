@@ -32,8 +32,8 @@ import {
   saveOfflineCred,
   matchOfflineCred,
 } from "@/lib/offlineStorage";
-import { Leaf, WifiOff } from "lucide-react";
-import { KDU_LOGO_URL } from "@/components/auth/AuthFlow";
+import { WifiOff } from "lucide-react";
+import { Splash } from "@/components/Splash";
 
 type AuthStage = "home" | "collector" | "admin";
 
@@ -499,41 +499,7 @@ export default function Home() {
 
   /* ---------- Boot splash ---------- */
   if (initialLoading) {
-    return (
-      <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-emerald-950 via-[#052e21] to-slate-950 text-white">
-        {/* Ambient glow orbs */}
-        <div className="absolute -top-28 -left-28 w-80 h-80 rounded-full bg-emerald-500/20 blur-3xl animate-pulse pointer-events-none" />
-        <div className="absolute -bottom-28 -right-28 w-96 h-96 rounded-full bg-teal-500/15 blur-3xl animate-pulse pointer-events-none" />
-        <div className="absolute top-1/3 right-1/4 w-40 h-40 rounded-full bg-emerald-400/10 blur-2xl pointer-events-none" />
-
-        {/* Floating leaves */}
-        <Leaf className="absolute top-[16%] left-[12%] w-12 h-12 text-emerald-400/40 animate-float pointer-events-none" />
-        <Leaf className="absolute bottom-[18%] right-[10%] w-14 h-14 text-teal-300/40 animate-float-slow rotate-45 pointer-events-none" />
-        <Leaf className="absolute top-[60%] left-[8%] w-9 h-9 text-emerald-300/30 animate-float-slow -rotate-12 pointer-events-none" />
-
-        {/* Logo with orbiting ring */}
-        <div className="relative w-36 h-36 flex items-center justify-center mb-7">
-          <div className="absolute inset-0 rounded-full border-4 border-emerald-400/25 border-t-emerald-400 animate-spin" />
-          <div className="absolute inset-2 rounded-full border-2 border-dashed border-teal-400/30 animate-[spin_9s_linear_infinite_reverse]" />
-          <div className="w-28 h-28 rounded-full overflow-hidden bg-white shadow-2xl shadow-emerald-500/40 ring-4 ring-emerald-400/40">
-            <img src={KDU_LOGO_URL} alt="KDU GROUP" className="w-full h-full object-cover" draggable={false} />
-          </div>
-        </div>
-
-        {/* Wordmark */}
-        <h1 className="text-3xl sm:text-4xl font-black tracking-[0.22em] bg-gradient-to-r from-emerald-300 via-teal-100 to-emerald-400 bg-clip-text text-transparent drop-shadow-lg">
-          KDU GROUP
-        </h1>
-        <div className="mt-3 h-[3px] w-24 rounded-full bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
-
-        {/* Elegant loader dots */}
-        <div className="mt-7 flex items-center gap-2" aria-label="Loading">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-bounce" />
-          <span className="w-2.5 h-2.5 rounded-full bg-teal-300 animate-bounce [animation-delay:120ms]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-bounce [animation-delay:240ms]" />
-        </div>
-      </div>
-    );
+    return <Splash />;
   }
 
   /* ---------- Auth stages ---------- */
