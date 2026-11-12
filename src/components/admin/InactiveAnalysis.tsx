@@ -224,6 +224,8 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
               : { maxHeight: COLLAPSED_MAX, overscrollBehavior: "contain" as const }
           }
         >
+          {/* min-width wrapper keeps columns readable and enables horizontal scroll */}
+          <div className="min-w-[820px]">
           <table className="w-full text-left text-xs">
             <thead className={`sticky top-0 z-10 border-b ${isDark ? "bg-slate-800/95 border-slate-700 text-slate-300 backdrop-blur" : "bg-slate-50/95 border-slate-200 text-slate-600 backdrop-blur"}`}>
               <tr>
@@ -285,6 +287,7 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

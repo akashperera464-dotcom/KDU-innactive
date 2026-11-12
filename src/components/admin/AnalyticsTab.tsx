@@ -509,6 +509,8 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               : { maxHeight: RECORDS_MAX, overscrollBehavior: "contain" as const }
           }
         >
+          {/* min-width wrapper keeps columns readable and enables horizontal scroll */}
+          <div className="min-w-[900px]">
           <table className="w-full text-left text-xs">
             <thead className={`sticky top-0 z-10 border-b backdrop-blur ${
               isDark ? "bg-slate-800/95 border-slate-700 text-slate-300" : "bg-slate-50/95 border-slate-200 text-slate-600"
@@ -641,6 +643,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
