@@ -510,19 +510,19 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           }
         >
           {/* min-width wrapper keeps columns readable and enables horizontal scroll */}
-          <div className="min-w-[900px]">
+          <div className="min-w-[1500px]">
           <table className="w-full text-left text-xs">
             <thead className={`sticky top-0 z-10 border-b backdrop-blur ${
               isDark ? "bg-slate-800/95 border-slate-700 text-slate-300" : "bg-slate-50/95 border-slate-200 text-slate-600"
             }`}>
               <tr>
-                <th className="px-4 py-3 font-bold">සැපයුම්කරු (Supplier)</th>
-                <th className="px-4 py-3 font-bold">මාර්ගය (Route)</th>
-                <th className="px-4 py-3 font-bold">ව්‍යාප්ති නිලධාරී (Ext. Officer)</th>
-                <th className="px-4 py-3 font-bold">දිනය & වේලාව (Timestamp)</th>
-                <th className="px-4 py-3 font-bold">ස්ථානය (GPS Location)</th>
-                <th className="px-4 py-3 font-bold">තත්ත්වය / හේතුව (Status)</th>
-                <th className="px-4 py-3 font-bold">දළු ප්‍රමාණය (Leaf Kg)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap">සැපයුම්කරු (Supplier)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap">මාර්ගය (Route)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap">ව්‍යාප්ති නිලධාරී (Ext. Officer)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap">දිනය & වේලාව (Timestamp)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap">ස්ථානය (GPS Location)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap">තත්ත්වය / හේතුව (Status)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap">දළු ප්‍රමාණය (Leaf Kg)</th>
                 <th className="px-4 py-3 font-bold text-right">ක්‍රියාමාර්ග</th>
               </tr>
             </thead>

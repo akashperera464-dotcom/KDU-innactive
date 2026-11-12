@@ -225,15 +225,15 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
           }
         >
           {/* min-width wrapper keeps columns readable and enables horizontal scroll */}
-          <div className="min-w-[820px]">
+          <div className="min-w-[1100px]">
           <table className="w-full text-left text-xs">
             <thead className={`sticky top-0 z-10 border-b ${isDark ? "bg-slate-800/95 border-slate-700 text-slate-300 backdrop-blur" : "bg-slate-50/95 border-slate-200 text-slate-600 backdrop-blur"}`}>
               <tr>
-                <th className="px-3 py-2.5 font-bold">සැපයුම්කරු (Supplier)</th>
-                <th className="px-3 py-2.5 font-bold">මාර්ගය (Route)</th>
-                <th className="px-3 py-2.5 font-bold">පරිපාලක හේතුව (Admin Expected)</th>
-                <th className="px-3 py-2.5 font-bold">ක්ෂේත්‍ර දත්ත (Field Actual)</th>
-                <th className="px-3 py-2.5 font-bold">තත්ත්වය (Verdict)</th>
+                <th className="px-3 py-2.5 font-bold whitespace-nowrap">සැපයුම්කරු (Supplier)</th>
+                <th className="px-3 py-2.5 font-bold whitespace-nowrap">මාර්ගය (Route)</th>
+                <th className="px-3 py-2.5 font-bold whitespace-nowrap">පරිපාලක හේතුව (Admin Expected)</th>
+                <th className="px-3 py-2.5 font-bold whitespace-nowrap">ක්ෂේත්‍ර දත්ත (Field Actual)</th>
+                <th className="px-3 py-2.5 font-bold whitespace-nowrap">තත්ත්වය (Verdict)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-emerald-500/10">
@@ -252,7 +252,7 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
                   <td className="px-3 py-2.5 text-[11px] font-semibold">
                     {reasonLabel(r.supplier.previousReason)}
                   </td>
-                  <td className="px-3 py-2.5 text-[11px]">
+                  <td className="px-3 py-2.5 text-[11px] whitespace-nowrap">
                     {r.visited ? (
                       <>
                         <span className="font-semibold">{reasonLabel(r.latestEntry!.promiseReason)}</span>
