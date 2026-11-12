@@ -29,6 +29,7 @@ interface ImportRow extends Partial<Supplier> {
   statusRaw?: string;
   reasonId?: string | null;
   term?: string;
+  rowStatus?: "active" | "inactive" | null;
 }
 
 const factoryOfRoute = (route?: string | null): string | null => {
@@ -153,7 +154,7 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
   /* ---------- Office Excel / CSV extraction ---------- */
   const applyParse = (res: ReturnType<typeof parseWorkbook>, label: string) => {
     const mapped: ImportRow[] = res.rows.map((r) => {
-      const { reasonId, term } = mapOfficeStatus(r.statusRaw);
+      const { reasonId, term, supplierStatus } = mapOfficeStatus(r.statusRaw);
       return {
         supplierNo: r.supplierNo,
         name: r.name,
@@ -166,6 +167,7 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
         statusRaw: r.statusRaw,
         term,
         reasonId,
+        rowStatus: supplierStatus,
       };
     });
     setImportRows(mapped);
@@ -234,7 +236,9 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
           remarks: r.remarks,
           lastWeightKg: r.lastWeightKg,
           previousReason: reasonId || undefined,
-          status: importStatus,
+          // Status comes from the office word itself (ACTIVE/WILL GIVE => active),
+          // falling back to the admin's chosen list default for unknown/blank rows.
+          status: r.rowStatus || importStatus,
           prunedDate: reasonId === "garden_pruned" ? today : undefined,
         };
       });
@@ -689,7 +693,9 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
 
               {/* Import as status */}
               <div className="flex items-center gap-3">
-                <span className={`text-xs font-bold ${isDark ? "text-slate-300" : "text-slate-600"}`}>ලැයිස්තුව සලකුණු කරන්න:</span>
+                <span className={`text-xs font-bold ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                  දුන්නේ නැති පේළිවල සුපුරුදු තත්ත්වය (Default for rows with no office status):
+                </span>
                 <button
                   onClick={() => setImportStatus("inactive")}
                   className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold border transition-all ${
@@ -730,6 +736,7 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
                           <th className="px-3 py-2">Route</th>
                           <th className="px-3 py-2">Kg</th>
                           <th className="px-3 py-2">Office Status → Reason</th>
+                          <th className="px-3 py-2">List Status</th>
                           <th className="px-3 py-2">Remarks</th>
                         </tr>
                       </thead>
@@ -745,6 +752,22 @@ export const SupplierDirectoryTab: React.FC<SupplierDirectoryTabProps> = ({
                               <span className="font-bold">{r.statusRaw || "—"}</span>
                               <span className={`block text-[9px] ${r.reasonId ? "text-emerald-400" : "text-amber-400"}`}>
                                 → {r.reasonId || `new: ${r.term}`}
+                              </span>
+                            </td>
+                            <td className="px-3 py-1.5">
+                              <span
+                                className={`px-1.5 py-0.5 rounded-full text-[9px] font-black border ${
+                                  r.rowStatus === "active"
+                                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                                    : r.rowStatus === "inactive"
+                                      ? "bg-amber-500/20 text-amber-400 border-amber-500/40"
+                                      : isDark
+                                        ? "bg-slate-700 text-slate-300 border-slate-600"
+                                        : "bg-slate-100 text-slate-500 border-slate-200"
+                                }`}
+                                title={r.rowStatus ? undefined : "unknown word — uses selected list default"}
+                              >
+                                {(r.rowStatus || importStatus).toUpperCase()}
                               </span>
                             </td>
                             <td className="px-3 py-1.5 text-amber-500">{r.remarks || ""}</td>

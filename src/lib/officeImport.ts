@@ -80,16 +80,28 @@ const slug = (s: string) =>
 
 const str = (v: unknown) => (v === undefined || v === null ? "" : String(v).trim());
 
-export function mapOfficeStatus(raw: string): { reasonId: string | null; term: string } {
+export function mapOfficeStatus(raw: string): {
+  reasonId: string | null;
+  term: string;
+  /** Supplier status derived from the office word: ACTIVE/WILL GIVE => active, else inactive. null = unknown word. */
+  supplierStatus: "active" | "inactive" | null;
+} {
   const term = str(raw).toUpperCase().replace(/\s+/g, " ");
-  if (!term) return { reasonId: null, term: "" };
+  if (!term) return { reasonId: null, term: "", supplierStatus: null };
   const low = str(raw).toLowerCase();
-  if ((KNOWN_REASON_IDS as string[]).includes(low)) return { reasonId: low, term };
-  if (OFFICE_STATUS_MAP[term]) return { reasonId: OFFICE_STATUS_MAP[term], term };
-  for (const [k, v] of Object.entries(OFFICE_STATUS_MAP)) {
-    if (term.includes(k)) return { reasonId: v, term };
+  if ((KNOWN_REASON_IDS as string[]).includes(low)) {
+    return { reasonId: low, term, supplierStatus: low === "provides_leaves" ? "active" : "inactive" };
   }
-  return { reasonId: null, term }; // unknown → caller auto-creates a reason
+  if (OFFICE_STATUS_MAP[term]) {
+    const rid = OFFICE_STATUS_MAP[term];
+    return { reasonId: rid, term, supplierStatus: rid === "provides_leaves" ? "active" : "inactive" };
+  }
+  for (const [k, v] of Object.entries(OFFICE_STATUS_MAP)) {
+    if (term.includes(k)) {
+      return { reasonId: v, term, supplierStatus: v === "provides_leaves" ? "active" : "inactive" };
+    }
+  }
+  return { reasonId: null, term, supplierStatus: null }; // unknown → caller auto-creates a reason
 }
 
 export function parseOfficeWorkbook(buf: ArrayBuffer): OfficeParseResult {
