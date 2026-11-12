@@ -18,13 +18,18 @@ import {
   ExternalLink, 
   AlertTriangle, 
   CheckCircle2, 
-  Sparkles 
+  Sparkles,
+  ChevronDown,
+  ChevronUp 
 } from "lucide-react";
 import { Entry, StatusReasonItem, RouteItem, User as UserType, Supplier } from "@/types";
 import { DonutChart, BarChart } from "./Charts";
 import { exportToCsv, exportToExcel } from "@/lib/exportUtils";
 import { EntryDetailsModal } from "./EntryDetailsModal";
 import { InactiveAnalysis } from "./InactiveAnalysis";
+
+/** Max height of the records table when collapsed (px). */
+const RECORDS_MAX = 460;
 
 interface AnalyticsTabProps {
   entries: Entry[];
@@ -60,6 +65,9 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
 
   // Record-type filter: controls the Data Collection Records table AND exports
   const [typeFilter, setTypeFilter] = useState<"all" | "inactive" | "extension">("all");
+
+  // Records table scroll control (same pattern as the analysis card)
+  const [recordsExpanded, setRecordsExpanded] = useState(false);
 
   // Compute Filtered Entries
   const filteredEntries = useMemo(() => {
@@ -260,7 +268,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
       {/* ======================================================== */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {/* KPI 1: Total Entries Card */}
-        <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${
+        <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${isDark ? "text-slate-100" : "text-slate-900"} ${
           isDark ? "bg-slate-900/90 border-emerald-500/40 glow-emerald" : "bg-white border-emerald-300 shadow-md"
         }`}>
           <div className="flex items-center justify-between mb-2">
@@ -269,12 +277,12 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white">{totalEntries}</div>
-          <p className="text-[11px] text-slate-400 mt-1">මුළු වාර්තා සංඛ්‍යාව</p>
+          <div className="text-2xl sm:text-3xl font-black">{totalEntries}</div>
+          <p className={`text-[11px] mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>මුළු වාර්තා සංඛ්‍යාව</p>
         </div>
 
         {/* KPI 2: Inactive Suppliers Card */}
-        <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${
+        <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${isDark ? "text-slate-100" : "text-slate-900"} ${
           isDark ? "bg-slate-900/90 border-amber-500/40 glow-amber" : "bg-white border-amber-300 shadow-md"
         }`}>
           <div className="flex items-center justify-between mb-2">
@@ -283,12 +291,12 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white">{inactiveSuppliersCount}</div>
-          <p className="text-[11px] text-slate-400 mt-1">අක්‍රිය / දළු පරීක්ෂණ</p>
+          <div className="text-2xl sm:text-3xl font-black">{inactiveSuppliersCount}</div>
+          <p className={`text-[11px] mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>අක්‍රිය / දළු පරීක්ෂණ</p>
         </div>
 
         {/* KPI 3: Extension Visit Card */}
-        <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${
+        <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${isDark ? "text-slate-100" : "text-slate-900"} ${
           isDark ? "bg-slate-900/90 border-blue-500/40 glow-blue" : "bg-white border-blue-300 shadow-md"
         }`}>
           <div className="flex items-center justify-between mb-2">
@@ -297,12 +305,12 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white">{extensionCount}</div>
-          <p className="text-[11px] text-slate-400 mt-1">ව්‍යාප්ති නිරීක්ෂණ විගණන</p>
+          <div className="text-2xl sm:text-3xl font-black">{extensionCount}</div>
+          <p className={`text-[11px] mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>ව්‍යාප්ති නිරීක්ෂණ විගණන</p>
         </div>
 
         {/* KPI 4: Total Leaf Volume (Kg) */}
-        <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${
+        <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${isDark ? "text-slate-100" : "text-slate-900"} ${
           isDark ? "bg-slate-900/90 border-teal-500/40" : "bg-white border-teal-300 shadow-md"
         }`}>
           <div className="flex items-center justify-between mb-2">
@@ -311,15 +319,15 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white font-mono">
+          <div className="text-2xl sm:text-3xl font-black font-mono">
             {totalLeafKg.toLocaleString(undefined, { maximumFractionDigits: 1 })}
             <span className="text-xs font-normal text-slate-400 ml-1">Kg</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">අලෙවි / අපේක්ෂිත දළු</p>
+          <p className={`text-[11px] mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>අලෙවි / අපේක්ෂිත දළු</p>
         </div>
 
         {/* KPI 5: Active Field Officers */}
-        <div className={`p-4 sm:p-5 rounded-3xl border transition-all col-span-2 sm:col-span-1 ${
+        <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${isDark ? "text-slate-100" : "text-slate-900"} col-span-2 sm:col-span-1 ${
           isDark ? "bg-slate-900/90 border-purple-500/40" : "bg-white border-purple-300 shadow-md"
         }`}>
           <div className="flex items-center justify-between mb-2">
@@ -328,8 +336,8 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               <User className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white">{uniqueCollectorsCount}</div>
-          <p className="text-[11px] text-slate-400 mt-1">ක්‍රියාකාරී නිලධාරීන්</p>
+          <div className="text-2xl sm:text-3xl font-black">{uniqueCollectorsCount}</div>
+          <p className={`text-[11px] mt-1 ${isDark ? "text-slate-400" : "text-slate-500"}`}>ක්‍රියාකාරී නිලධාරීන්</p>
         </div>
       </div>
 
@@ -439,6 +447,29 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
             ක්ෂේත්‍ර වාර්තා ලැයිස්තුව (Data Collection Records) - {tableEntries.length} Records
           </h4>
 
+          {/* Scroll control: collapse the table into a fixed-height scroller */}
+          <button
+            onClick={() => setRecordsExpanded((v) => !v)}
+            title={recordsExpanded ? "වගුව කුඩා කරන්න" : "සම්පූර්ණ ලැයිස්තුව පෙන්වන්න"}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-extrabold border transition-all active:scale-95 ${
+              isDark
+                ? "bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
+                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            {recordsExpanded ? (
+              <>
+                <ChevronUp className="w-3.5 h-3.5" />
+                <span>හැකිළිය (Collapse)</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown className="w-3.5 h-3.5" />
+                <span>සම්පූර්ණ ලැයිස්තුව (Expand)</span>
+              </>
+            )}
+          </button>
+
           {/* Record-type filter pills: All / Inactive / Ext-RA */}
           <div className={`flex items-center p-1 rounded-2xl border ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"}`}>
             {(
@@ -470,10 +501,17 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div
+          className="overflow-auto rounded-2xl border"
+          style={
+            recordsExpanded
+              ? undefined
+              : { maxHeight: RECORDS_MAX, overscrollBehavior: "contain" as const }
+          }
+        >
           <table className="w-full text-left text-xs">
-            <thead className={`border-b ${
-              isDark ? "bg-slate-800/80 border-slate-700 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-600"
+            <thead className={`sticky top-0 z-10 border-b backdrop-blur ${
+              isDark ? "bg-slate-800/95 border-slate-700 text-slate-300" : "bg-slate-50/95 border-slate-200 text-slate-600"
             }`}>
               <tr>
                 <th className="px-4 py-3 font-bold">සැපයුම්කරු (Supplier)</th>
