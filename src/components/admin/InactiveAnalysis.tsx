@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { GitCompareArrows, UserCheck, UserX, HeartPulse, Shuffle, Download, MapPin } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { GitCompareArrows, UserCheck, UserX, HeartPulse, Shuffle, Download, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { Entry, Supplier, StatusReasonItem } from "@/types";
 
 interface InactiveAnalysisProps {
@@ -10,6 +10,9 @@ interface InactiveAnalysisProps {
   reasons: StatusReasonItem[];
   theme: "dark" | "light";
 }
+
+/** Max height of the comparison table when collapsed (px). */
+const COLLAPSED_MAX = 420;
 
 interface AnalysisRow {
   supplier: Supplier;
@@ -26,6 +29,9 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
   theme,
 }) => {
   const isDark = theme === "dark";
+
+  // expanded = the table grows to its natural height instead of scrolling inside the card
+  const [expanded, setExpanded] = useState(false);
 
   const reasonLabel = (id?: string | null) => {
     if (!id) return "—";
@@ -116,18 +122,47 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
           <h4 className={`font-bold text-sm sm:text-base flex items-center gap-2 ${isDark ? "text-white" : "text-slate-900"}`}>
             <GitCompareArrows className="w-5 h-5 text-emerald-400" />
             <span>අක්‍රිය සැපයුම්කරු විග්‍රහය (Admin List VS Field Data)</span>
+            <span className={`shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full border ${isDark ? "bg-slate-800 text-slate-300 border-slate-700" : "bg-slate-100 text-slate-600 border-slate-200"}`}>
+              {rows.length}
+            </span>
           </h4>
           <p className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
             පරිපාලක ලැයිස්තුවේ ඇති අක්‍රිය සැපයුම්කරුවන්, ක්ෂේත්‍ර නිලධාරීන් සත්‍ය වශයෙන්ම නිරීක්ෂණය කළේද යන්න සසඳා බලයි.
           </p>
         </div>
-        <button
-          onClick={exportAnalysisCsv}
+
+        <div className="flex items-center gap-2">
+          {/* Expand / collapse the table so the page stays compact */}
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-extrabold border transition-all active:scale-95 ${
+              isDark
+                ? "bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
+                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+            }`}
+            title={expanded ? "වගුව කුඩා කරන්න" : "සම්පූර්ණ ලැයිස්තුව පෙන්වන්න"}
+          >
+            {expanded ? (
+              <>
+                <ChevronUp className="w-3.5 h-3.5" />
+                <span>හැකිළිය (Collapse)</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown className="w-3.5 h-3.5" />
+                <span>සම්පූර්ණ ලැයිස්තුව (Expand)</span>
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={exportAnalysisCsv}
           className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-[#0F766E] hover:bg-teal-700 shadow-md shadow-teal-700/30 active:scale-95 transition-all"
         >
           <Download className="w-3.5 h-3.5" />
           <span>Export Analysis</span>
         </button>
+        </div>
       </div>
 
       {/* Coverage bar */}
@@ -175,15 +210,22 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
         </div>
       </div>
 
-      {/* Comparison table */}
+      {/* Comparison table — capped height, scrolls internally */}
       {rows.length === 0 ? (
         <p className={`text-xs text-center py-6 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
           පරිපාලක ලැයිස්තුවේ අක්‍රිය සැපයුම්කරුවන් නොමැත. (Import the office inactive-supplier list from the Suppliers tab to unlock this analysis.)
         </p>
       ) : (
-        <div className="overflow-x-auto">
+        <div
+          className="overflow-auto rounded-2xl border"
+          style={
+            expanded
+              ? undefined
+              : { maxHeight: COLLAPSED_MAX, overscrollBehavior: "contain" as const }
+          }
+        >
           <table className="w-full text-left text-xs">
-            <thead className={`border-b ${isDark ? "bg-slate-800/80 border-slate-700 text-slate-300" : "bg-slate-50 border-slate-200 text-slate-600"}`}>
+            <thead className={`sticky top-0 z-10 border-b ${isDark ? "bg-slate-800/95 border-slate-700 text-slate-300 backdrop-blur" : "bg-slate-50/95 border-slate-200 text-slate-600 backdrop-blur"}`}>
               <tr>
                 <th className="px-3 py-2.5 font-bold">සැපයුම්කරු (Supplier)</th>
                 <th className="px-3 py-2.5 font-bold">මාර්ගය (Route)</th>
