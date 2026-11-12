@@ -31,6 +31,9 @@ import { InactiveAnalysis } from "./InactiveAnalysis";
 /** Max height of the records table when collapsed (px). */
 const RECORDS_MAX = 460;
 
+/** Explicit table width (px) — guarantees all 11 columns render with room. */
+const RECORDS_TABLE_W = 1480;
+
 interface AnalyticsTabProps {
   entries: Entry[];
   reasons: StatusReasonItem[];
@@ -502,27 +505,29 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
         </div>
 
         <div
-          className="overflow-auto rounded-2xl border"
-          style={
-            recordsExpanded
-              ? undefined
-              : { maxHeight: RECORDS_MAX, overscrollBehavior: "contain" as const }
-          }
+          className="rounded-2xl border"
+          style={{
+            overflowX: "scroll",
+            overflowY: "auto",
+            ...(recordsExpanded ? {} : { maxHeight: RECORDS_MAX, overscrollBehavior: "contain" as const }),
+          }}
         >
-          {/* min-width wrapper keeps columns readable and enables horizontal scroll */}
-          <div className="min-w-[1500px]">
-          <table className="w-full text-left text-xs">
+          {/* explicit width guarantees every column has room on any screen */}
+          <table
+            className="text-left text-xs"
+            style={{ width: RECORDS_TABLE_W, tableLayout: "fixed" }}
+          >
             <thead className={`sticky top-0 z-10 border-b backdrop-blur ${
               isDark ? "bg-slate-800/95 border-slate-700 text-slate-300" : "bg-slate-50/95 border-slate-200 text-slate-600"
             }`}>
               <tr>
-                <th className="px-4 py-3 font-bold whitespace-nowrap">සැපයුම්කරු (Supplier)</th>
-                <th className="px-4 py-3 font-bold whitespace-nowrap">මාර්ගය (Route)</th>
-                <th className="px-4 py-3 font-bold whitespace-nowrap">ව්‍යාප්ති නිලධාරී (Ext. Officer)</th>
-                <th className="px-4 py-3 font-bold whitespace-nowrap">දිනය & වේලාව (Timestamp)</th>
-                <th className="px-4 py-3 font-bold whitespace-nowrap">ස්ථානය (GPS Location)</th>
-                <th className="px-4 py-3 font-bold whitespace-nowrap">තත්ත්වය / හේතුව (Status)</th>
-                <th className="px-4 py-3 font-bold whitespace-nowrap">දළු ප්‍රමාණය (Leaf Kg)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 190 }}>සැපයුම්කරු (Supplier)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 130 }}>මාර්ගය (Route)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 170 }}>ව්‍යාප්ති නිලධාරී (Ext. Officer)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 170 }}>දිනය & වේලාව (Timestamp)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 210 }}>ස්ථානය (GPS Location)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 190 }}>තත්ත්වය / හේතුව (Status)</th>
+                <th className="px-4 py-3 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 130 }}>දළු ප්‍රමාණය (Leaf Kg)</th>
                 <th className="px-4 py-3 font-bold text-right">ක්‍රියාමාර්ග</th>
               </tr>
             </thead>
@@ -643,7 +648,6 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               )}
             </tbody>
           </table>
-          </div>
         </div>
       </div>
 

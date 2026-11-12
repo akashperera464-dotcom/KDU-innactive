@@ -14,6 +14,9 @@ interface InactiveAnalysisProps {
 /** Max height of the comparison table when collapsed (px). */
 const COLLAPSED_MAX = 420;
 
+/** Explicit table width (px) — guarantees all 5 columns render with room. */
+const ANALYSIS_TABLE_W = 1060;
+
 interface AnalysisRow {
   supplier: Supplier;
   latestEntry?: Entry;
@@ -241,23 +244,25 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
           </div>
           <div
             ref={scrollRef}
-            className="overflow-x-auto overflow-y-auto rounded-2xl border"
-            style={
-              expanded
-                ? undefined
-                : { maxHeight: COLLAPSED_MAX, overscrollBehavior: "contain" as const }
-            }
+            className="rounded-2xl border"
+            style={{
+              overflowX: "scroll",
+              overflowY: "auto",
+              ...(expanded ? {} : { maxHeight: COLLAPSED_MAX, overscrollBehavior: "contain" as const }),
+            }}
           >
-          {/* min-width wrapper keeps columns readable and enables horizontal scroll */}
-          <div className="min-w-[1100px]">
-          <table className="w-full text-left text-xs">
+          {/* explicit width guarantees every column has room on any screen */}
+          <table
+            className="text-left text-xs"
+            style={{ width: ANALYSIS_TABLE_W, tableLayout: "fixed" }}
+          >
             <thead className={`border-b ${isDark ? "bg-slate-800/95 border-slate-700 text-slate-300" : "bg-slate-50/95 border-slate-200 text-slate-600"}`}>
               <tr>
-                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800">සැපයුම්කරු (Supplier)</th>
-                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800">මාර්ගය (Route)</th>
-                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800">පරිපාලක හේතුව (Admin Expected)</th>
-                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800">ක්ෂේත්‍ර දත්ත (Field Actual)</th>
-                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800">තත්ත්වය (Verdict)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 190 }}>සැපයුම්කරු (Supplier)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 150 }}>මාර්ගය (Route)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 210 }}>පරිපාලක හේතුව (Admin Expected)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 330 }}>ක්ෂේත්‍ර දත්ත (Field Actual)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 180 }}>තත්ත්වය (Verdict)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-emerald-500/10">
@@ -276,7 +281,7 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
                   <td className="px-3 py-2.5 text-[11px] font-semibold">
                     {reasonLabel(r.supplier.previousReason)}
                   </td>
-                  <td className="px-3 py-2.5 text-[11px] whitespace-nowrap">
+                  <td className="px-3 py-2.5 text-[11px]">
                     {r.visited ? (
                       <>
                         <span className="font-semibold">{reasonLabel(r.latestEntry!.promiseReason)}</span>
@@ -311,7 +316,6 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
               ))}
             </tbody>
           </table>
-          </div>
         </div>
         </div>
       )}
