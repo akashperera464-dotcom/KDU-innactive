@@ -117,7 +117,7 @@ export const HomeScreen: React.FC<{
             </span>
           </button>
 
-          {/* Admin Portal */}
+          {/* Admin Login */}
           <button
             onClick={onSelectAdmin}
             className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md hover:bg-white/20 text-left shadow-xl active:scale-[0.98] transition-all"
@@ -125,9 +125,9 @@ export const HomeScreen: React.FC<{
             <ShieldHalf className="w-7 h-7 text-emerald-300 shrink-0" />
             <span>
               <span className="block text-lg font-extrabold text-white leading-tight">
-                පරිපාලන ද්වාරය
+                පරිපාලක පිවිසුම
               </span>
-              <span className="block text-sm text-slate-200 font-medium">Admin Portal</span>
+              <span className="block text-sm text-slate-200 font-medium">Admin Login</span>
             </span>
           </button>
         </div>
@@ -328,7 +328,7 @@ export const AdminLoginScreen: React.FC<{
           </div>
 
           <h1 className="text-center text-4xl font-extrabold text-white drop-shadow-lg">
-            Admin Portal
+            Admin Login
           </h1>
           <p className="mt-2 mb-8 text-center text-slate-300 font-semibold text-sm flex items-center justify-center gap-1.5">
             <Lock className="w-3.5 h-3.5" />
