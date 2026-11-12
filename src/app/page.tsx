@@ -33,7 +33,6 @@ import {
   matchOfflineCred,
 } from "@/lib/offlineStorage";
 import { WifiOff } from "lucide-react";
-import { Splash } from "@/components/Splash";
 
 type AuthStage = "home" | "collector" | "admin";
 
@@ -53,7 +52,6 @@ export default function Home() {
   const [routes, setRoutes] = useState<RouteItem[]>([]);
   const [reasons, setReasons] = useState<StatusReasonItem[]>([]);
   const [customQuestions, setCustomQuestions] = useState<CustomQuestionItem[]>([]);
-  const [initialLoading, setInitialLoading] = useState(true);
 
   const applyTheme = (t: "dark" | "light") => {
     setTheme(t);
@@ -151,8 +149,6 @@ export default function Home() {
       setSuppliers(getCachedSuppliers());
       setCustomQuestions(getCachedQuestions());
       ok = false;
-    } finally {
-      setInitialLoading(false);
     }
 
     return ok;
@@ -496,11 +492,6 @@ export default function Home() {
       await fetch(`/api/questions/${id}`, { method: "DELETE" });
     } catch {}
   };
-
-  /* ---------- Boot splash ---------- */
-  if (initialLoading) {
-    return <Splash />;
-  }
 
   /* ---------- Auth stages ---------- */
   if (!user) {
