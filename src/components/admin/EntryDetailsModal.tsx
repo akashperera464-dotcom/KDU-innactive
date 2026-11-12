@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { createPortal } from "react-dom";
 import { 
   X, 
   MapPin, 
@@ -33,7 +34,26 @@ export const EntryDetailsModal: React.FC<EntryDetailsModalProps> = ({
   onDelete,
   theme,
 }) => {
-  if (!isOpen || !entry) return null;
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+
+  // lock background scroll while the modal is open
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [isOpen]);
+
+  // close on Escape
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !entry || !mounted) return null;
   const isDark = theme === "dark";
 
   let dynamicParsed: Record<string, any> = {};
@@ -43,11 +63,22 @@ export const EntryDetailsModal: React.FC<EntryDetailsModalProps> = ({
     }
   } catch (err) {}
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-      <div className={`relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 shadow-2xl border transition-all ${
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center sm:p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`relative w-full sm:max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl border transition-all ${
         isDark ? "bg-slate-900 border-emerald-500/30 text-white" : "bg-white border-emerald-200 text-slate-900"
-      }`}>
+      }`}
+        style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+      >
+        {/* mobile drag handle */}
+        <div className="sm:hidden flex justify-center mb-2 -mt-1">
+          <span className="w-10 h-1.5 rounded-full bg-slate-400/50" />
+        </div>
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-emerald-500/20 mb-4">
           <div className="flex items-center gap-3">
@@ -286,6 +317,7 @@ export const EntryDetailsModal: React.FC<EntryDetailsModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

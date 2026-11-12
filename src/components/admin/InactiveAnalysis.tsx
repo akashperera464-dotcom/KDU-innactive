@@ -15,7 +15,7 @@ interface InactiveAnalysisProps {
 const COLLAPSED_MAX = 420;
 
 /** Explicit table width (px) — guarantees all 5 columns render with room. */
-const ANALYSIS_TABLE_W = 1060;
+const ANALYSIS_TABLE_W = 2080;
 
 interface AnalysisRow {
   supplier: Supplier;
@@ -258,27 +258,44 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
           >
             <thead className={`border-b ${isDark ? "bg-slate-800/95 border-slate-700 text-slate-300" : "bg-slate-50/95 border-slate-200 text-slate-600"}`}>
               <tr>
-                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 190 }}>සැපයුම්කරු (Supplier)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 120 }}>අංකය (No)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 200 }}>නම (Name)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 130 }}>දුරකථන (Phone)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 260 }}>ලිපිනය (Address)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 150 }}>කර්මාන්ත ශාලාව (Factory)</th>
                 <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 150 }}>මාර්ගය (Route)</th>
-                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 210 }}>පරිපාලක හේතුව (Admin Expected)</th>
-                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 330 }}>ක්ෂේත්‍ර දත්ත (Field Actual)</th>
-                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 180 }}>තත්ත්වය (Verdict)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 110 }}>අවසන් බර (Kg)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 200 }}>පරිපාලක හේතුව (Admin Expected)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 300 }}>ක්ෂේත්‍ර දත්ත (Field Actual)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 170 }}>ව්‍යාප්ති නිලධාරී (Officer)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 220 }}>සටහන් (Remarks)</th>
+                <th className="sticky top-0 z-10 px-3 py-2.5 font-bold whitespace-nowrap bg-slate-50 dark:bg-slate-800" style={{ width: 170 }}>තත්ත්වය (Verdict)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-emerald-500/10">
               {rows.map((r) => (
                 <tr key={r.supplier.id} className={isDark ? "text-slate-200" : "text-slate-800"}>
-                  <td className="px-3 py-2.5">
-                    <span className="font-extrabold text-emerald-400">#{r.supplier.supplierNo}</span>
-                    <span className="block text-[11px] font-semibold">{r.supplier.name}</span>
+                  <td className="px-3 py-2.5 font-mono font-bold text-emerald-400 whitespace-nowrap">#{r.supplier.supplierNo}</td>
+                  <td className="px-3 py-2.5 font-semibold whitespace-nowrap">{r.supplier.name}</td>
+                  <td className="px-3 py-2.5 text-[11px] whitespace-nowrap">{r.supplier.phone || "—"}</td>
+                  <td className="px-3 py-2.5 max-w-[240px]">
+                    <span className="block truncate text-[11px]" title={r.supplier.address || undefined}>
+                      {r.supplier.address || "—"}
+                    </span>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-2.5 text-[11px] font-bold whitespace-nowrap">
+                    {r.supplier.factory
+                      ? r.supplier.factory.replace(" Tea Factory", "").replace(" Leaf Center", " LC")
+                      : "—"}
+                  </td>
+                  <td className="px-3 py-2.5 whitespace-nowrap">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[10px]">
                       <MapPin className="w-3 h-3" />
                       {r.supplier.route || "—"}
                     </span>
                   </td>
-                  <td className="px-3 py-2.5 text-[11px] font-semibold">
+                  <td className="px-3 py-2.5 font-mono font-bold whitespace-nowrap">{r.supplier.lastWeightKg || "0"}</td>
+                  <td className="px-3 py-2.5 text-[11px] font-semibold whitespace-nowrap">
                     {reasonLabel(r.supplier.previousReason)}
                   </td>
                   <td className="px-3 py-2.5 text-[11px]">
@@ -291,6 +308,18 @@ export const InactiveAnalysis: React.FC<InactiveAnalysisProps> = ({
                       </>
                     ) : (
                       <span className="text-amber-400 font-bold">තවම නිරීක්ෂණය නැත (No visit)</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2.5 text-[11px] whitespace-nowrap">
+                    {r.visited ? r.latestEntry!.collectorId : "—"}
+                  </td>
+                  <td className="px-3 py-2.5 max-w-[220px]">
+                    {r.supplier.remarks ? (
+                      <span className="block truncate text-[11px] font-bold text-amber-400" title={r.supplier.remarks}>
+                        ✎ {r.supplier.remarks}
+                      </span>
+                    ) : (
+                      <span className="text-slate-500 text-[11px]">-</span>
                     )}
                   </td>
                   <td className="px-3 py-2.5">
